@@ -1,0 +1,245 @@
+@font-face {
+    font-family: "Nova Mono";
+    src: url(NovaMono.ttf);
+}
+
+* {
+    text-align: center;
+    transition-duration: 0.5s;
+    font-family: 'Nova Mono';
+    user-select: none;
+}
+
+body {
+    background-color: rgb(0, 2, 26);
+}
+
+body, .shadow.normal {
+    color: rgb(235, 196, 162);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(224, 69, 255), 0.3333333em 0.3333333em 0.66666667em rgb(154, 77, 255);
+}
+
+.unlocked > .shadow {
+    color: rgb(65, 54, 46);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(224, 69, 255), 0.3333333em 0.3333333em 0.66666667em rgb(50, 2, 114);
+}
+
+b {
+    font-size: 1.2em;
+}
+
+.slowdown {
+    color: rgb(235, 162, 162);
+    font-size: 0.8em;
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(255, 69, 162), 0.3333333em 0.3333333em 0.66666667em rgb(196, 87, 187);
+}
+
+.compaction {
+    color: rgb(221, 88, 88);
+    font-size: 0.8em;
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(255, 69, 193), 0.3333333em 0.3333333em 0.66666667em rgb(174, 87, 196);
+}
+
+table, tr, .table {
+    display: flex;
+    justify-content: center;
+}
+
+table {
+	flex-flow: column wrap;
+}
+
+tr, .tableRow {
+    flex-flow: row wrap;
+    margin-bottom: 10px;
+}
+
+.tabbtn {
+    height: 40px;
+    width: 120px;
+    font-size: 1.1em;
+    border: 2px solid white;
+    font-weight: bold;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.unlocked {
+    cursor: pointer;
+}
+
+.unlocked:hover {
+    filter: brightness(120%);
+    transform: scale(1.1);
+}
+
+.unlocked:active {
+    transition-duration: 0.25s;
+    filter: brightness(200%);
+    transform: scale(1.2);
+}
+
+.locked {
+    cursor: not-allowed;
+}
+
+.options.unlocked {
+    color: rgb(255, 255, 255);
+    background-color: rgb(54, 72, 75);
+    border: 2px solid rgba(114, 165, 165, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.options.unlocked:not(.tabbtn) {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.op {
+    width: 120px;
+    height: 120px;
+}
+
+#hardReset {
+    background-color: rgb(94, 15, 15);
+}
+
+#toggleAutoSave {
+    background-color: rgb(15, 94, 26);
+}
+
+#saveGame {
+    background-color: rgb(15, 78, 94);
+}
+
+#offTime {
+    background-color: rgb(82, 94, 15);
+}
+
+.universe.unlocked {
+    color: white;
+    background: linear-gradient(135deg, rgba(12, 81, 255,1) 20%, rgba(191,0,131,1) 100%);
+}
+
+.prestige.unlocked {
+    color: black;
+    background-color: rgb(0, 210, 247);
+    border: 2px solid rgba(78, 192, 99, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.prestige.locked {
+    color: white;
+    background-color: rgb(77, 99, 114);
+    border: 2px solid rgba(192, 78, 78, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.prestige.locked:hover {
+    background-color: rgb(121, 64, 64)
+}
+
+.prestige.shadow {
+    color: rgb(114, 222, 236);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(69, 171, 255), 0.3333333em 0.3333333em 0.66666667em rgb(100, 0, 139);
+}
+
+.unlocked:not(.quarks) > .prestige.shadow {
+    color: rgb(45, 91, 97);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(24, 57, 94), 0.3333333em 0.3333333em 0.66666667em rgb(39, 1, 71);
+}
+
+.essence.unlocked {
+    color: black;
+    background-color: rgb(189, 0, 247);
+    border: 2px solid rgba(78, 192, 87, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.essence.locked {
+    color: white;
+    background-color: rgb(98, 81, 105);
+    border: 2px solid rgba(192, 78, 78, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.essence.locked:hover {
+    background-color: rgb(121, 64, 64)
+}
+
+.essence.shadow {
+    color: rgb(182, 119, 241);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(112, 51, 255), 0.3333333em 0.3333333em 0.66666667em rgb(12, 165, 157);
+}
+
+.unlocked > .essence.shadow {
+    color: rgb(74, 17, 82);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(43, 41, 172), 0.3333333em 0.3333333em 0.66666667em rgb(1, 128, 167);
+}
+
+.essenceUpg {
+    width: 300px;
+    height: 150px;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.quarks.unlocked {
+    color: white;
+    background: linear-gradient(90deg, red 15%, green 50%, blue 85%);
+    border: 2px solid rgb(158, 255, 247);
+    padding: 5px 5px 5px 5px;
+}
+
+.quarks.locked {
+    color: white;
+    background: linear-gradient(90deg, rgb(119, 81, 81) 15%, rgb(81, 119, 81) 50%, rgb(81, 81, 119) 85%);
+    border: 2px solid rgba(255, 0, 0, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.quarks.locked:hover {
+    filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(-45deg);
+}
+
+.red.shadow {
+    color: rgb(255, 73, 73);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(163, 52, 0), 0.3333333em 0.3333333em 0.66666667em rgb(109, 126, 13);
+}
+
+.green.shadow {
+    color: rgb(94, 255, 73);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(0, 163, 109), 0.3333333em 0.3333333em 0.66666667em rgb(13, 126, 111);
+}
+
+.blue.shadow {
+    color: rgb(141, 133, 255);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(89, 0, 255), 0.3333333em 0.3333333em 0.66666667em rgb(126, 13, 117);
+}
+
+.quarks.shadow {
+    background: linear-gradient(90deg, rgb(139, 139, 255) 0%, rgb(255, 139, 139) 30%, rgb(139, 255, 139) 65%, rgb(139, 139, 255) 100%);
+    background-size: 1em 2em;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgba(255, 255, 255, 0.5), 0.3333333em 0.3333333em 0.66666667em rgba(255, 255, 255, 0.2);
+}
+
+.quarksupg.shadow {
+    background: linear-gradient(90deg, rgb(0, 0, 100) 0%, rgb(100, 0, 0) 30%, rgb(0, 50, 0) 65%, rgb(0, 0, 100) 100%);
+    background-size: 1em 2em;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgba(125, 125, 125, 0.4), 0.3333333em 0.3333333em 0.66666667em rgba(125, 125, 125, 0.15);
+}
+
+.gluon.shadow {
+    background: linear-gradient(90deg, rgb(180, 139, 180) 0%, rgb(180, 180, 139) 30%, rgb(139, 180, 180) 65%, rgb(180, 139, 255) 100%);
+    background-size: 1em 2em;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgba(255, 255, 255, 0.5), 0.3333333em 0.3333333em 0.66666667em rgba(255, 255, 255, 0.2);
+}

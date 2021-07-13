@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<head>
+	<title>Universe Expander: Rewritten</title>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="style.css">
+	<script type="text/javascript" src="js/important/break_eternity.js"></script>
+	<script type="text/javascript" src="js/important/format.js"></script>
+    <script type="text/javascript" src="js/important/temp.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+	<script type="text/javascript" src="js/important/setup.js"></script>
+    <script type="text/javascript" src="js/gameplay/basics.js"></script>
+    <script type="text/javascript" src="js/gameplay/first_reset.js"></script>
+    <script type="text/javascript" src="js/gameplay/quarks.js"></script>
+</head>
+<body onload="loadGame()">
+	<div id="app">
+        <div v-if="!player.begun">
+            <br><br><br>
+            <button class="prestige unlocked" style="width: 100px; height: 100px; font-size: 20px;" onclick="player.begun = true;"><b class="normal shadow">BEGIN</b></button>
+        </div>
+        <div v-if="player.begun">
+            Your universe has a volume of <b>{{format(player.size, 3)}}m<sup>3</sup></b> (×{{format(tmp.sizeBase, 3)}}/<span v-html="player.size.gte(tmp.slowdown.start)?(player.size.gte(tmp.compaction.start)?'log(s)':('&radic;<span style=&quot;border-top: 1px solid; font-size: 10px;&quot;><span style=&quot;font-size: 15px;&quot;>s</span></span>')):'s'"></span>)<br>
+            <div class="slowdown" v-if="player.size.gte(tmp.slowdown.start)">Universal Slowdown is slowing down your Universe's growth beyond {{format(tmp.slowdown.start)}}m<sup>3</sup></div><div v-else><br></div>
+            <div class="compaction" v-if="player.size.gte(tmp.compaction.start)">Universal Compaction is halting your Universe's growth beyond {{format(tmp.compaction.start)}}m<sup>3</sup></div><div v-else><br></div><br>
+            <div><table>
+                <tr>
+                    <td v-for="(tab, name) in tabs.normal"><button v-if="tabs.normal[name]()" v-on:click="showTab(name, 'normal')" v-bind:class="{[name.toLowerCase()]: true, tabbtn: true, unlocked: true}">{{name}}</button></td>
+                </tr>
+            </table></div><br><br>
+            <div v-if="tabData.normal=='Options'">
+                <table>
+                    <tr>
+                        <td><button id="hardReset" class="options op unlocked" onclick="hardReset()">HARD RESET</button></td><td><button id="saveGame" class="options op unlocked" onclick="save()">Save</button></td>
+                    </tr>
+                    <tr>
+                        <td><button id="offTime" class="options op unlocked" onclick="toggleOffTime()">Offline Progress: {{player.offtime?"ON":"OFF"}}</button></td><td><button id="toggleAutoSave" class="options op unlocked" onclick="toggleAutoSave()">Autosave: {{player.autosave?"ON":"OFF"}}</button></td>
+                    </tr>
+                </table><br><br>
+                Created by <b class="essence shadow">Jacorb</b><br>
+                Credit to Letorin for helping plan this out :)<br><br>
+                <a href="https://discord.gg/wwQfgPa" target="_blank" style="text-shadow: none; color: rgb(235, 196, 162);">Jacorb's Discord Server</a>
+            </div>
+            <div v-if="tabData.normal=='Universe'">
+                <button v-bind:class="{prestige: true, unlocked: player.size.gte(tmp.prestige.req), locked: player.size.lt(tmp.prestige.req)}" onclick="prestige()">Reach <b class="normal shadow">{{format(tmp.prestige.req, 3)}} m<sup>3</sup></b> to delve into Dimensional Depth <b class="prestige shadow">{{formatWhole(player.depth.plus(1))}}</b></button><br><br>
+                <div v-if="player.depth.gte(1)">
+                    You have completed <b class="prestige shadow">{{formatWhole(player.depth)}}</b> Dimensional Depths, which boost Universe Growth Speed by <b class="prestige shadow">{{format(tmp.prestige.eff)}}x</b>.<br>
+                    You have <b class="essence shadow">{{formatWhole(player.essence)}}</b> Universe Essence.<br><br>
+                    <button v-if="!player.upgsUnl" v-bind:class="{ essence: true, unlocked: player.essence.gte(universe_upgs_unl_req), locked: player.essence.lt(universe_upgs_unl_req) }" onclick="unlockUniversalUpgs()"><b>Unlock Universal Upgrades</b><br>Cost: <b class="essence shadow">{{formatWhole(universe_upgs_unl_req)}}</b> Universe Essence</button>
+                    <div v-if="player.upgsUnl">
+                        <table>
+                            <tr>
+                                <td></td>
+                                <td><button v-bind:class="{ essence: true, unlocked: Object.keys(player.upgs).length>0, locked: Object.keys(player.upgs).length==0 }" onclick="respecUniverseUpgs()"><b>Respec Universe Upgrades</b></button></td>
+                                <td></td>
+                            </tr>
+                            <tr v-for="row in universe_upgs.rows">
+                                <td v-for="col in universe_upgs.cols">
+                                    <button v-if="universe_upgs[row*10+col].unl()" v-bind:class="{ essenceUpg: true, essence: true, unlocked: player.essence.gte(tmp.upgs[row*10+col].cost), locked: player.essence.lt(tmp.upgs[row*10+col].cost) }" v-on:click="buyUniverseUpg(row*10+col)"><b v-html="checkFunc(universe_upgs[row*10+col].desc)"></b><br><br>Cost: <b class="essence shadow">{{formatWhole(tmp.upgs[row*10+col].cost)}}</b> Universe Essence<br>Level: <b class="essence shadow">{{formatWhole(tmp.upgs[row*10+col].effL)}}</b><br>Currently: <b class="essence shadow" v-html="universe_upgs[row*10+col].dispEff(tmp.upgs[row*10+col].eff)"></b></button>
+                                </td>
+                            </tr>
+                        </table>
+                        <button v-if="!player.quarks.unl" v-bind:class="{ quarks: true, unlocked: player.depth.gte(quarks_unl_req), locked: player.depth.lt(quarks_unl_req) }" style="margin-top: 5px;" onclick="unlockQuarks()"><b>Unlock Quarks</b><br>Req: <b class="prestige shadow">{{formatWhole(quarks_unl_req)}}</b> Dimensional Depths</button>
+                    </div>
+                </div>
+            </div>
+            <div v-if="tabData.normal=='Quarks'">
+                You have <b class="red shadow">{{format(player.quarks.red)}}</b> Red Quarks, which multiply Green Quark gain by <b class="green shadow">{{format(tmp.qk.eff.red)}}</b>.<br><br>
+                You have <b class="green shadow">{{format(player.quarks.green)}}</b> Green Quarks, which multiply Blue Quark gain by <b class="blue shadow">{{format(tmp.qk.eff.green)}}</b>.<br><br>
+                You have <b class="blue shadow">{{format(player.quarks.blue)}}</b> Blue Quarks, which multiply Red Quark gain by <b class="red shadow">{{format(tmp.qk.eff.blue)}}</b>.<br><br><br>
+                The Gluon is <b class="gluon shadow">{{format(tmp.qk.gluon.size)}}m</b> long, which boosts Universe Growth Speed by <b class="gluon shadow">{{format(tmp.qk.gluon.eff)}}x</b><br><br><br><br>
+                You have <b class="quarks shadow">{{formatWhole(player.quarks.charge)}}</b> Quark Charge, which strengthens all Quark effects by <b class="quarks shadow">{{format(tmp.qk.eff.charge.sub(1).times(100))+(tmp.qk.eff.addedCharge.gt(1)?(" + "+format(tmp.qk.eff.addedCharge.sub(1).times(100))):"")}}%</b>.<br><br>
+                <button v-bind:class="{ quarks: true, unlocked: tmp.qk.net.gte(tmp.qk.chargeCost), locked: tmp.qk.net.lt(tmp.qk.chargeCost) }" onclick="buyQuarkCharge()">Charge your Quarks.<br>Cost: <b class="quarksupg shadow">{{format(tmp.qk.chargeCost)}}</b> Total Quarks</button>
+            </div>
+        </div>
+    </div> 
+</body>
