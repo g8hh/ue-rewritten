@@ -1,12 +1,30 @@
 const universe_upgs_unl_req = new Decimal(7)
 const universe_upgs = {
-    rows: 2,
+    rows: 4,
     cols: 3,
+    rowUnls: {
+        1: {
+            desc: "Unlock Universal Upgrades",
+            unl() { return player.upgsUnl },
+        },
+        2: {
+            desc: "Unlock Quarks",
+            unl() { return player.quarks.unl },
+        },
+        3: {
+            desc: "Unlock Hadrons",
+            unl() { return player.hadrons.unl },
+        },
+        4: {
+            desc: "Reach 4 Hadronic Boosters",
+            unl() { return player.hadrons.boosters.gte(4) },
+        },
+    },
     11: {
         unl() { return player.upgsUnl },
         desc: "Dimensional Depths lower their goal.",
         cost(l) { return l.div(3).plus(1).pow(2).floor() },
-        eff(l) { return player.depth.plus(1).log10().times(l).plus(1).sqrt().sub(1) },
+        eff(l) { return player.depth.plus(1).log(Decimal.root(10, tmp.upgs[43].eff).max(2)).times(l).times(tmp.upgs[43].eff).plus(1).sqrt().sub(1) },
         dispEff(e) { return "-"+format(e)+" depths" },
     }, 
     12: {
@@ -19,6 +37,7 @@ const universe_upgs = {
     13: {
         unl() { return player.upgsUnl },
         desc: "Improve the Dimensional Depth effect.",
+        extra() { return tmp.upgs[42].eff },
         cost(l) { return l.div(2).plus(1).pow(2.2).plus(2).floor() },
         eff(l) { return l.plus(1).root(20).plus(l.plus(1).log10()) },
         dispEff(e) { return "^"+format(e) },
@@ -44,6 +63,48 @@ const universe_upgs = {
         eff(l) { return tmp.qk?(tmp.qk.net.plus(1).log10().div(5).times(l)):new Decimal(0) },
         dispEff(e) { return "+"+format(e) },
     },
+    31: {
+        unl() { return player.hadrons.unl },
+        desc: "The Gluon's effect is stronger based on your Hadrons.",
+        cost(l) { return l.times(2).plus(1).pow(2.6).plus(6).floor() },
+        eff(l) { return player.hadrons.amount.plus(1).log10().div(4).times(l).plus(1) },
+        dispEff(e) { return "^"+format(e) },
+    },
+    32: {
+        unl() { return player.hadrons.unl },
+        desc: "The Gluon boosts Hadron gain",
+        cost(l) { return l.times(2.5).plus(1).pow(2.7).plus(7).floor() },
+        eff(l) { return tmp.qk?(tmp.qk.gluon.size.plus(1).log10().times(l).plus(1).pow(l.plus(1).log2().cbrt())):new Decimal(0) },
+        dispEff(e) { return format(e)+"x" },
+    },
+    33: {
+        unl() { return player.hadrons.unl },
+        desc: "Universal Compaction starts later.",
+        cost(l) { return l.times(3).plus(1).pow(2.8).plus(8).floor() },
+        eff(l) { return l.plus(1).log10().plus(1) },
+        dispEff(e) { return format(e)+"x later" },
+    },
+    41: {
+        unl() { return player.hadrons.boosters.gte(4) },
+        desc: "Red Quarks cheapen Quark Charge.",
+        cost(l) { return l.times(3.5).plus(1).pow(2.9).plus(9).floor() },
+        eff(l) { return player.quarks.red.plus(1).log10().plus(1).pow(l) },
+        dispEff(e) { return "/"+format(e) },
+    },
+    42: {
+        unl() { return player.hadrons.boosters.gte(4) },
+        desc: "Green Quarks give free levels to Universe Upgrade 3.",
+        cost(l) { return l.times(4).plus(1).pow(3).plus(10).floor() },
+        eff(l) { return player.quarks.green.plus(1).log10().plus(1).log2().times(l) },
+        dispEff(e) { return "+"+format(e) },
+    },
+    43: {
+        unl() { return player.hadrons.boosters.gte(4) },
+        desc: "Blue Quarks strengthen Universe Upgrade 1.",
+        cost(l) { return l.times(4.5).plus(1).pow(3.1).plus(11).floor() },
+        eff(l) { return player.quarks.blue.plus(1).log10().plus(1).log10().div(1.5).times(l).plus(1) },
+        dispEff(e) { return format(e.sub(1).times(100))+"% stronger" },
+    },
 }
 
 function getPrestigeReq() { return Decimal.pow(1.05, player.depth.sub(tmp.upgs[11].eff).div(3).plus(1).pow(3).plus(1)) }
@@ -57,6 +118,8 @@ function prestige(force=false, auto=false) {
     }
     player.size = new Decimal(1)
     player.time = new Decimal(0)
+    player.hadrons.time = new Decimal(0)
+    player.hadrons.amount = new Decimal(0)
 
     if (!auto) updateTemp();
 }

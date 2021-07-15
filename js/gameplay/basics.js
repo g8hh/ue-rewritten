@@ -5,6 +5,7 @@ function gameLoop(diff) {
     player.time = player.time.plus(diff)
     player.size = getSize(player.time);
     if (player.quarks.unl) quarkLoop(diff);
+    if (player.hadrons.unl) hadronLoop(diff);
 }
 
 function getSize(time) {
@@ -22,6 +23,13 @@ function getSizeBase() {
 
 function getUniverseSlowdownStart() {
     let start = tmp.upgs[12].eff.plus(2);
+    if (player.hadrons.unl) start = start.times(tmp.had.eff);
+    return start;
+}
+
+function getUniverseCompactionStart() {
+    let start = tmp.upgs[33].eff.times(120);
+    if (player.hadrons.unl) start = start.times(tmp.had.eff);
     return start;
 }
 

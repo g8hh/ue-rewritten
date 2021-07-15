@@ -12,6 +12,7 @@ const tabs = {
         Options() { return true },
         Universe() { return true },
         Quarks() { return player.quarks.unl },
+        Hadrons() { return player.hadrons.unl },
     },
 }
 
@@ -35,6 +36,12 @@ function startPlayer() { return {
         green: new Decimal(0),
         blue: new Decimal(0),
         charge: new Decimal(0),
+    },
+    hadrons: {
+        unl: false,
+        time: new Decimal(0),
+        amount: new Decimal(0),
+        boosters: new Decimal(0),
     },
 }}
 
@@ -79,6 +86,32 @@ function hardReset() {
 function toggleAutoSave() { player.autosave = !player.autosave }
 function toggleOffTime() { player.offtime = !player.offtime }
 
+function importSave() {
+	let data = prompt("Paste save data: ")
+	if (data===undefined||data===null||data=="") return;
+	try {
+		player = JSON.parse(atob(data));
+		save()
+		window.location.reload();
+	} catch(e) {
+		console.log("Import failed!");
+		console.error(e);
+		return;
+	}
+}
+
+function exportSave() {
+	let data = btoa(JSON.stringify(player))
+	const a = document.createElement('a');
+	a.setAttribute('href', 'data:text/plain;charset=utf-8,' + data);
+	a.setAttribute('download', "uer.txt");
+	a.setAttribute('id', 'downloadSave');
+
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+}
+
 function loadVue() {
     return new Vue({
         el: "#app",
@@ -95,6 +128,7 @@ function loadVue() {
             buyUniverseUpg,
             quarks_unl_req,
             checkFunc,
+            hadrons_unl_req,
         },
     })
 }

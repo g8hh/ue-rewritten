@@ -17,7 +17,9 @@ function quarkLoop(diff) {
 }
 
 function getQuarkChargeCost() {
-    return Decimal.pow(2.5, player.quarks.charge.pow(1.2));
+    let cost = Decimal.pow(2.5, player.quarks.charge.pow(1.2));
+    if (player.hadrons.boosters.gte(4)) cost = cost.div(tmp.upgs[41].eff)
+    return cost;
 }
 
 function buyQuarkCharge(auto=false) {
@@ -45,4 +47,10 @@ function getGluonSizeRatio() {
 
     let ratio = Decimal.sub(1, Decimal.div(1, tmp.qk.net.times(getGluonGrowthMult()).plus(1).log10().plus(1).sqrt()))
     return ratio;
+}
+
+function getGluonEff() {
+    let size = tmp.qk.gluon.size;
+    if (size.gte(300)) size = Decimal.pow(300, size.log(300).cbrt().plus(1)).sqrt();
+    return size.times(2).plus(1).log2().plus(1).log2().plus(1).pow(tmp.upgs[31].eff.div(2).times(tmp.had.boostEff))
 }

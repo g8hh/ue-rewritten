@@ -12,6 +12,7 @@
     <script type="text/javascript" src="js/gameplay/basics.js"></script>
     <script type="text/javascript" src="js/gameplay/first_reset.js"></script>
     <script type="text/javascript" src="js/gameplay/quarks.js"></script>
+    <script type="text/javascript" src="js/gameplay/hadrons.js"></script>
 </head>
 <body onload="loadGame()">
 	<div id="app">
@@ -20,7 +21,7 @@
             <button class="prestige unlocked" style="width: 100px; height: 100px; font-size: 20px;" onclick="player.begun = true;"><b class="normal shadow">BEGIN</b></button>
         </div>
         <div v-if="player.begun">
-            Your universe has a volume of <b>{{format(player.size, 3)}}m<sup>3</sup></b> (×{{format(tmp.sizeBase, 3)}}/<span v-html="player.size.gte(tmp.slowdown.start)?(player.size.gte(tmp.compaction.start)?'log(s)':('&radic;<span style=&quot;border-top: 1px solid; font-size: 10px;&quot;><span style=&quot;font-size: 15px;&quot;>s</span></span>')):'s'"></span>)<br>
+            Your universe has a volume of <b>{{format(player.size, 3)}}m<sup>3</sup></b> (×{{format(tmp.sizeBase.root(player.size.gte(tmp.slowdown.start)?2:1).root(player.size.gte(tmp.compaction.start)?2:1), 3)}}/<span v-html="player.size.gte(tmp.compaction.start)?'log(s)':'s'"></span>)<br>
             <div class="slowdown" v-if="player.size.gte(tmp.slowdown.start)">Universal Slowdown is slowing down your Universe's growth beyond {{format(tmp.slowdown.start)}}m<sup>3</sup></div><div v-else><br></div>
             <div class="compaction" v-if="player.size.gte(tmp.compaction.start)">Universal Compaction is halting your Universe's growth beyond {{format(tmp.compaction.start)}}m<sup>3</sup></div><div v-else><br></div><br>
             <div><table>
@@ -31,10 +32,10 @@
             <div v-if="tabData.normal=='Options'">
                 <table>
                     <tr>
-                        <td><button id="hardReset" class="options op unlocked" onclick="hardReset()">HARD RESET</button></td><td><button id="saveGame" class="options op unlocked" onclick="save()">Save</button></td>
+                        <td><button id="export" class="options op unlocked" onclick="exportSave()">Export Save</button></td><td><button id="hardReset" class="options op unlocked" onclick="hardReset()">HARD RESET</button></td><td><button id="saveGame" class="options op unlocked" onclick="save()">Save</button></td>
                     </tr>
                     <tr>
-                        <td><button id="offTime" class="options op unlocked" onclick="toggleOffTime()">Offline Progress: {{player.offtime?"ON":"OFF"}}</button></td><td><button id="toggleAutoSave" class="options op unlocked" onclick="toggleAutoSave()">Autosave: {{player.autosave?"ON":"OFF"}}</button></td>
+                        <td><button id="import" class="options op unlocked" onclick="importSave()">Import Save</button></td><td><button id="offTime" class="options op unlocked" onclick="toggleOffTime()">Offline Progress: {{player.offtime?"ON":"OFF"}}</button></td><td><button id="toggleAutoSave" class="options op unlocked" onclick="toggleAutoSave()">Autosave: {{player.autosave?"ON":"OFF"}}</button></td>
                     </tr>
                 </table><br><br>
                 Created by <b class="essence shadow">Jacorb</b><br>
@@ -54,9 +55,14 @@
                                 <td><button v-bind:class="{ essence: true, unlocked: Object.keys(player.upgs).length>0, locked: Object.keys(player.upgs).length==0 }" onclick="respecUniverseUpgs()"><b>Respec Universe Upgrades</b></button></td>
                                 <td></td>
                             </tr>
+                            <tr>
+                                <td></td>
+                                <td v-if="player.hadrons.boosters.lt(4)">{{(tmp.upgs.rowsUnl<4)?(universe_upgs.rowUnls[tmp.upgs.rowsUnl+1].desc+" to unlock new Universe Upgrades"):""}}</td>
+                                <td></td>
+                            </tr>
                             <tr v-for="row in universe_upgs.rows">
                                 <td v-for="col in universe_upgs.cols">
-                                    <button v-if="universe_upgs[row*10+col].unl()" v-bind:class="{ essenceUpg: true, essence: true, unlocked: player.essence.gte(tmp.upgs[row*10+col].cost), locked: player.essence.lt(tmp.upgs[row*10+col].cost) }" v-on:click="buyUniverseUpg(row*10+col)"><b v-html="checkFunc(universe_upgs[row*10+col].desc)"></b><br><br>Cost: <b class="essence shadow">{{formatWhole(tmp.upgs[row*10+col].cost)}}</b> Universe Essence<br>Level: <b class="essence shadow">{{formatWhole(tmp.upgs[row*10+col].effL)}}</b><br>Currently: <b class="essence shadow" v-html="universe_upgs[row*10+col].dispEff(tmp.upgs[row*10+col].eff)"></b></button>
+                                    <button v-if="universe_upgs[row*10+col].unl()" v-bind:class="{ essenceUpg: true, essence: true, unlocked: player.essence.gte(tmp.upgs[row*10+col].cost), locked: player.essence.lt(tmp.upgs[row*10+col].cost) }" v-on:click="buyUniverseUpg(row*10+col)"><b v-html="checkFunc(universe_upgs[row*10+col].desc)"></b><br><br>Cost: <b class="essence shadow">{{formatWhole(tmp.upgs[row*10+col].cost)}}</b> Universe Essence<br>Level: <b class="essence shadow">{{formatWhole(tmp.upgs[row*10+col].lvl)+(tmp.upgs[row*10+col].extra.gt(0)?(" + "+format(tmp.upgs[row*10+col].extra)):"")}}</b><br>Currently: <b class="essence shadow" v-html="universe_upgs[row*10+col].dispEff(tmp.upgs[row*10+col].eff)"></b></button>
                                 </td>
                             </tr>
                         </table>
@@ -70,7 +76,13 @@
                 You have <b class="blue shadow">{{format(player.quarks.blue)}}</b> Blue Quarks, which multiply Red Quark gain by <b class="red shadow">{{format(tmp.qk.eff.blue)}}</b>.<br><br><br>
                 The Gluon is <b class="gluon shadow">{{format(tmp.qk.gluon.size)}}m</b> long, which boosts Universe Growth Speed by <b class="gluon shadow">{{format(tmp.qk.gluon.eff)}}x</b><br><br><br><br>
                 You have <b class="quarks shadow">{{formatWhole(player.quarks.charge)}}</b> Quark Charge, which strengthens all Quark effects by <b class="quarks shadow">{{format(tmp.qk.eff.charge.sub(1).times(100))+(tmp.qk.eff.addedCharge.gt(1)?(" + "+format(tmp.qk.eff.addedCharge.sub(1).times(100))):"")}}%</b>.<br><br>
-                <button v-bind:class="{ quarks: true, unlocked: tmp.qk.net.gte(tmp.qk.chargeCost), locked: tmp.qk.net.lt(tmp.qk.chargeCost) }" onclick="buyQuarkCharge()">Charge your Quarks.<br>Cost: <b class="quarksupg shadow">{{format(tmp.qk.chargeCost)}}</b> Total Quarks</button>
+                <button v-bind:class="{ quarks: true, unlocked: tmp.qk.net.gte(tmp.qk.chargeCost), locked: tmp.qk.net.lt(tmp.qk.chargeCost) }" onclick="buyQuarkCharge()">Charge your Quarks.<br>Cost: <b class="quarksupg shadow">{{format(tmp.qk.chargeCost)}}</b> Total Quarks</button><br><br>
+                <button v-if="!player.hadrons.unl" v-bind:class="{ hadrons: true, unlocked: tmp.qk.gluon.size.gte(hadrons_unl_req), locked: tmp.qk.gluon.size.lt(hadrons_unl_req) }" onclick="unlockHadrons()"><b>Unlock Hadrons</b><br>Req: <b class="gluon shadow">{{formatWhole(hadrons_unl_req)}}m</b> of Gluon</button>
+            </div>
+            <div v-if="tabData.normal=='Hadrons'">
+                You have <b class="hadrons shadow">{{format(player.hadrons.amount)}}</b> Hadrons (+{{format(tmp.had.dispGain)}}/s), which are extending the starts of Universal Slowdown & Compaction by <b class="hadrons shadow">{{format(tmp.had.eff)}}x</b><br><br>
+                You have <b class="hadrons shadow">{{formatWhole(player.hadrons.boosters)}}</b> Hadronic Boosters, which are strengthening Quark & Gluon effects by <b class="gluon shadow">{{format(tmp.had.boostEff.sub(1).times(100))}}%</b>, and are multiplying Hadron gain by <b class="hadrons shadow">{{formatWhole(tmp.had.boostEff2)}}x</b><br><br>
+                <button v-bind:class="{hadrons: true, unlocked: player.hadrons.amount.gte(tmp.had.boostCost), locked: player.hadrons.amount.lt(tmp.had.boostCost)}" onclick="boostHadrons()">Reset your Hadrons for a Boost<br><br>Cost: <b class="hadrons shadow">{{format(tmp.had.boostCost)}}</b> Hadrons</button>
             </div>
         </div>
     </div> 

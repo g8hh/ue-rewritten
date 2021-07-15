@@ -116,6 +116,14 @@ tr, .tableRow {
     background-color: rgb(82, 94, 15);
 }
 
+#export {
+    background-color: rgb(94, 60, 15);
+}
+
+#import {
+    background-color: rgb(62, 15, 94);
+}
+
 .universe.unlocked {
     color: white;
     background: linear-gradient(135deg, rgba(12, 81, 255,1) 20%, rgba(191,0,131,1) 100%);
@@ -242,4 +250,31 @@ tr, .tableRow {
     background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0.166667em 0.166667em 0.3333333em rgba(255, 255, 255, 0.5), 0.3333333em 0.3333333em 0.66666667em rgba(255, 255, 255, 0.2);
+}
+
+.hadrons.unlocked {
+    color: white;
+    background-color: black;
+    border: 2px solid rgb(255, 174, 0);
+    padding: 5px 5px 5px 5px;
+}
+
+.hadrons.unlocked:hover {
+    background-color: rgb(107, 73, 0);
+}
+
+.hadrons.locked {
+    color: white;
+    background-color: rgb(68, 61, 44);
+    border: 2px solid rgba(228, 152, 108, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.hadrons.locked:hover {
+    background-color: rgba(228, 152, 108, 0.5);
+}
+
+.hadrons.shadow {
+    color: rgb(255, 174, 0);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(187, 128, 0), 0.3333333em 0.3333333em 0.66666667em rgb(82, 0, 0);
 }
