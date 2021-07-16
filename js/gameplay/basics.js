@@ -6,6 +6,12 @@ function gameLoop(diff) {
     player.size = getSize(player.time);
     if (player.quarks.unl) quarkLoop(diff);
     if (player.hadrons.unl) hadronLoop(diff);
+    if (player.autoDepths && hasAnhUpg(22)) prestige(false, true);
+    if (player.autoQH && hasAnhUpg(23)) {
+        buyQuarkCharge(true, true)
+        boostHadrons(true, true)
+    }
+    if (player.autoUU && hasAnhUpg(26)) maxAllUniUpgs(true);
 }
 
 function getSize(time) {
@@ -18,6 +24,7 @@ function getSize(time) {
 function getSizeBase() {
     let base = Decimal.pow(1.01, tmp.prestige.eff)
     if (player.quarks.unl) base = base.pow(tmp.qk.gluon.eff)
+    if (player.annihilation.reached) base = base.pow(tmp.anh.eff)
     return base;
 }
 
@@ -30,6 +37,7 @@ function getUniverseSlowdownStart() {
 function getUniverseCompactionStart() {
     let start = tmp.upgs[33].eff.times(120);
     if (player.hadrons.unl) start = start.times(tmp.had.eff);
+    if (hasAnhUpg(25)) start = start.times(2);
     return start;
 }
 

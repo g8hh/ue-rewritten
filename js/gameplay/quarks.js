@@ -1,10 +1,24 @@
 const quarks_unl_req = new Decimal(9)
 const quark_types = ["red", "green", "blue"]
 
+function playerQuarksData(fullReset=true) { return {
+    unl: (!fullReset && hasAnhUpg(15)),
+    red: new Decimal(0),
+    green: new Decimal(0),
+    blue: new Decimal(0),
+    charge: new Decimal(0),
+}}
+
 function unlockQuarks() {
     if (player.quarks.unl) return;
     if (player.depth.lt(quarks_unl_req)) return;
     player.quarks.unl = true;
+}
+
+function getGlobalQKGainMult() {
+    let mult = new Decimal(1)
+    if (hasAnhUpg(21)) mult = tmp.anh.upgs[21].eff
+    return mult;
 }
 
 function getQuarkGain(type) {
@@ -17,20 +31,32 @@ function quarkLoop(diff) {
 }
 
 function getQuarkChargeCost() {
-    let cost = Decimal.pow(2.5, player.quarks.charge.pow(1.2));
-    if (player.hadrons.boosters.gte(4)) cost = cost.div(tmp.upgs[41].eff)
+    let c = player.quarks.charge;
+    if (c.gte(10)) c = Decimal.pow(10, c.log10().pow(2).times(2).sub(1));
+    let cost = Decimal.pow(2.5, c.pow(1.2));
+    if (player.hadrons.boosters.gte(4)||hasAnhUpg(15)) cost = cost.div(tmp.upgs[41].eff)
     return cost;
 }
 
-function buyQuarkCharge(auto=false) {
+function getQuarkChargeTarget() {
+    let n = tmp.qk.net;
+    if (player.hadrons.boosters.gte(4)||hasAnhUpg(15)) n = n.times(tmp.upgs[41].eff)
+    let t = n.max(0.5).log(2.5).root(1.2);
+    if (t.gte(10)) t = Decimal.pow(10, t.log10().plus(1).div(2).sqrt());
+    return t.plus(1).floor()
+}
+
+function buyQuarkCharge(auto=false, max=false) {
     if (!player.quarks.unl) return;
     if (!auto) {
         tmp.qk.net = player.quarks.red.plus(player.quarks.blue).plus(player.quarks.green)
         tmp.qk.chargeCost = getQuarkChargeCost();
     }
     if (tmp.qk.net.lt(tmp.qk.chargeCost)) return;
-    subTotalQuarks(tmp.qk.chargeCost);
-    player.quarks.charge = player.quarks.charge.plus(1);
+    if (!max) {
+        subTotalQuarks(tmp.qk.chargeCost);
+        player.quarks.charge = player.quarks.charge.plus(1);
+    } else player.quarks.charge = player.quarks.charge.max(getQuarkChargeTarget())
 }
 
 function subTotalQuarks(x) {
@@ -39,6 +65,7 @@ function subTotalQuarks(x) {
 
 function getGluonGrowthMult() {
     let mult = tmp.upgs[22].eff;
+    if (hasAnhUpg(14)) mult = mult.times(10);
     return mult;
 }
 
@@ -52,5 +79,12 @@ function getGluonSizeRatio() {
 function getGluonEff() {
     let size = tmp.qk.gluon.size;
     if (size.gte(300)) size = Decimal.pow(300, size.log(300).cbrt().plus(1)).sqrt();
-    return size.times(2).plus(1).log2().plus(1).log2().plus(1).pow(tmp.upgs[31].eff.div(2).times(tmp.had.boostEff))
+    return size.times(2).plus(1).log2().plus(1).log2().times(tmp.upgs[31].eff.mul.plus(1).pow(tmp.upgs[31].eff.pow.div(2).times(tmp.had.boostEff.min(1.75))).times(tmp.had.boostEff.max(1.75).sub(.75)))
+}
+
+function getGluonProportionSize() {
+    let size = player.size
+    if (size.gte(1e6)) size = Decimal.pow(1e6, size.log(1e6).sqrt());
+    if (size.gte(1e4)) size = size.times(1e8).cbrt();
+    return size;
 }

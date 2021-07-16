@@ -4,7 +4,9 @@ var tmp = {};
 var intervals = {};
 var tabData = {
     normal: "Universe",
+    anh: "Upgrades",
 }
+var importInput;
 var storageName = "UErewritten";
 
 const tabs = {
@@ -13,6 +15,11 @@ const tabs = {
         Universe() { return true },
         Quarks() { return player.quarks.unl },
         Hadrons() { return player.hadrons.unl },
+        Annihilation() { return player.depth.gte(tmp.anh.req)||player.annihilation.reached },
+    },
+    anh: {
+        Upgrades() { return player.annihilation.reached },
+        Boosts() { return player.annihilation.reached },
     },
 }
 
@@ -26,23 +33,16 @@ function startPlayer() { return {
     size: new Decimal(1),
     time: new Decimal(0),
     depth: new Decimal(0),
+    autoDepths: false,
+    autoQH: false,
+    autoUU: false,
     essence: new Decimal(0),
     spentEssence: new Decimal(0),
     upgsUnl: false,
     upgs: {},
-    quarks: {
-        unl: false,
-        red: new Decimal(0),
-        green: new Decimal(0),
-        blue: new Decimal(0),
-        charge: new Decimal(0),
-    },
-    hadrons: {
-        unl: false,
-        time: new Decimal(0),
-        amount: new Decimal(0),
-        boosters: new Decimal(0),
-    },
+    quarks: playerQuarksData(),
+    hadrons: playerHadronsData(),
+    annihilation: playerAnnihilationData(),
 }}
 
 function save() {
@@ -54,7 +54,7 @@ function loadGame() {
     if (g !== null) player = JSON.parse(atob(g));
     else player = startPlayer();
 
-    fixPlayerObj(player, startPlayer());
+    fixObj(player, startPlayer());
     transformPlayerToDecimal()
 
     updateTemp();
@@ -63,10 +63,10 @@ function loadGame() {
     loadVue();
 }
 
-function fixPlayerObj(obj, start) {
+function fixObj(obj, start) {
 	for (let x in start) {
 		if (obj[x] === undefined) obj[x] = start[x]
-		else if (typeof start[x] == "object" && !(start[x] instanceof Decimal)) fixPlayerObj(obj[x], start[x])
+		else if (typeof start[x] == "object" && !(start[x] instanceof Decimal)) fixObj(obj[x], start[x])
 		else if (start[x] instanceof Decimal) obj[x] = new Decimal(obj[x])
 	}
 }
@@ -86,18 +86,42 @@ function hardReset() {
 function toggleAutoSave() { player.autosave = !player.autosave }
 function toggleOffTime() { player.offtime = !player.offtime }
 
+function doImport(input) {
+    let files = input.files;
+
+    if (files.length>0) {
+        let file = files[files.length-1];
+        let type = file.name.split(".")[1]
+        if (type=="txt") {
+            var reader = new FileReader()
+            reader.readAsText(file)
+
+            try {
+                reader.onload = function(e) {
+                    let data = e.target.result;
+
+                    player = JSON.parse(atob(data))
+                    save();
+                    document.location.reload();
+                }
+            } catch(e) {
+                console.log("Import Error");
+            }
+        }
+    }
+};
+
 function importSave() {
-	let data = prompt("Paste save data: ")
-	if (data===undefined||data===null||data=="") return;
-	try {
-		player = JSON.parse(atob(data));
-		save()
-		window.location.reload();
-	} catch(e) {
-		console.log("Import failed!");
-		console.error(e);
-		return;
-	}
+    let field = document.getElementById('importField')
+	importInput = field?field:document.createElement('input');
+    if (!field) {
+	    importInput.setAttribute('type', 'file');
+        importInput.setAttribute('id', 'importField')
+        importInput.setAttribute('onchange', 'doImport(importInput)')
+	    document.body.appendChild(importInput);
+    }
+
+	importInput.click();
 }
 
 function exportSave() {
@@ -129,6 +153,9 @@ function loadVue() {
             quarks_unl_req,
             checkFunc,
             hadrons_unl_req,
+            annihilation_upgs,
+            buyAnnihilationUpg,
+            hasAnhUpg,
         },
     })
 }
