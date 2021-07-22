@@ -18,8 +18,16 @@ function hadronLoop(diff) {
     player.hadrons.amount = getHadrons();
 }
 
-function getHadrons() { return tmp.had.baseGain.times(player.hadrons.time.sqrt()) }
-function getHadronDispGain() { return tmp.had.baseGain.div(player.hadrons.time.sqrt().times(2).sub(1).max(1)) }
+function getHadronNerfExp() {
+    let exp = .5;
+    if (voidUpgActive(14)) exp = Math.sqrt(exp);
+    return exp;
+}
+function getHadrons() { return tmp.had.baseGain.times(player.hadrons.time.pow(getHadronNerfExp())) }
+function getHadronDispGain() { 
+    let exp = getHadronNerfExp()
+    return tmp.had.baseGain.times(exp).times(player.hadrons.time.pow(exp-1)) 
+}
 
 function getHadronGainMult() {
     let mult = tmp.had.boostEff2.times(tmp.upgs[32].eff);

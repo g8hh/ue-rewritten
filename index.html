@@ -14,6 +14,7 @@
     <script type="text/javascript" src="js/gameplay/quarks.js"></script>
     <script type="text/javascript" src="js/gameplay/hadrons.js"></script>
     <script type="text/javascript" src="js/gameplay/annihilation.js"></script>
+    <script type="text/javascript" src="js/gameplay/void.js"></script>
 </head>
 <body onload="loadGame()">
 	<div id="app">
@@ -22,7 +23,7 @@
             <button class="prestige unlocked" style="width: 100px; height: 100px; font-size: 20px;" onclick="player.begun = true;"><b class="normal shadow">BEGIN</b></button>
         </div>
         <div v-if="player.begun">
-            Your universe has a volume of <b>{{format(player.size, 3)}}m<sup>3</sup></b> (×{{format(tmp.sizeBase.root(player.size.gte(tmp.slowdown.start)?2:1).root(player.size.gte(tmp.compaction.start)?2:1), 3)}}/<span v-html="player.size.gte(tmp.compaction.start)?'log(s)':'s'"></span>)<br>
+            Your universe has a volume of <b>{{format(player.size, 3)}}m<sup>3</sup></b> ({{(player.size.gte(tmp.compaction.start)?"+":"×")+format(player.size.gte(tmp.compaction.start)?displayCompactionSizeGain():tmp.sizeBase.root(player.size.gte(tmp.slowdown.start)?2:1), 3)}}/s)<br>
             <div class="slowdown" v-if="player.size.gte(tmp.slowdown.start)">Universal Slowdown is slowing down your Universe's growth beyond {{format(tmp.slowdown.start)}}m<sup>3</sup></div><div v-else><br></div>
             <div class="compaction" v-if="player.size.gte(tmp.compaction.start)">Universal Compaction is halting your Universe's growth beyond {{format(tmp.compaction.start)}}m<sup>3</sup></div><div v-else><br></div><br>
             <div><table>
@@ -53,13 +54,13 @@
                         <table>
                             <tr>
                                 <td></td>
-                                <td><button v-if="!hasAnhUpg(22)" v-bind:class="{ essence: true, unlocked: Object.keys(player.upgs).length>0, locked: Object.keys(player.upgs).length==0 }" onclick="respecUniverseUpgs()"><b>Respec Universal Upgrades</b></button>
+                                <td v-if="!player.void.active"><button v-if="!hasAnhUpg(22)" v-bind:class="{ essence: true, unlocked: Object.keys(player.upgs).length>0, locked: Object.keys(player.upgs).length==0 }" onclick="respecUniverseUpgs()"><b>Respec Universal Upgrades</b></button>
                                     <button v-else class="essence unlocked" onclick="maxAllUniUpgs()"><b>Max All</b></button></td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <td></td>
-                                <td v-if="player.hadrons.boosters.lt(4)">{{(tmp.upgs.rowsUnl<4)?(universe_upgs.rowUnls[tmp.upgs.rowsUnl+1].desc+" to unlock new Universal Upgrades"):""}}</td>
+                                <td v-if="player.hadrons.boosters.lt(4)&&!player.void.active">{{(tmp.upgs.rowsUnl<4)?(universe_upgs.rowUnls[tmp.upgs.rowsUnl+1].desc+" to unlock new Universal Upgrades"):""}}</td>
                                 <td></td>
                             </tr>
                             <tr v-for="row in universe_upgs.rows">
@@ -76,7 +77,7 @@
                 You have <b class="red shadow">{{format(player.quarks.red)}}</b> Red Quarks, which multiply Green Quark gain by <b class="green shadow">{{format(tmp.qk.eff.red)}}</b>.<br><br>
                 You have <b class="green shadow">{{format(player.quarks.green)}}</b> Green Quarks, which multiply Blue Quark gain by <b class="blue shadow">{{format(tmp.qk.eff.green)}}</b>.<br><br>
                 You have <b class="blue shadow">{{format(player.quarks.blue)}}</b> Blue Quarks, which multiply Red Quark gain by <b class="red shadow">{{format(tmp.qk.eff.blue)}}</b>.<br><br><br>
-                The Gluon is <b class="gluon shadow">{{format(tmp.qk.gluon.size)}}m</b> long, which boosts Universe Growth Speed by <b class="gluon shadow">{{format(tmp.qk.gluon.eff)}}x</b><br><br><br><br>
+                The Gluon is <b class="gluon shadow">{{format(tmp.qk.gluon.size)}}m</b> long, which boosts Universe Growth Speed{{voidUpgActive(16)?" & Quark gain":""}} by <b class="gluon shadow">{{format(tmp.qk.gluon.eff)}}x</b><br><br><br><br>
                 You have <b class="quarks shadow">{{formatWhole(player.quarks.charge)}}</b> Quark Charge, which strengthens all Quark effects by <b class="quarks shadow">{{format(tmp.qk.eff.charge.sub(1).times(100))+(tmp.qk.eff.addedCharge.gt(1)?(" + "+format(tmp.qk.eff.addedCharge.sub(1).times(100))):"")}}%</b>.<br><br>
                 <button v-bind:class="{ quarks: true, unlocked: tmp.qk.net.gte(tmp.qk.chargeCost), locked: tmp.qk.net.lt(tmp.qk.chargeCost) }" onclick="buyQuarkCharge()">Charge your Quarks.<br>Cost: <b class="quarksupg shadow">{{format(tmp.qk.chargeCost)}}</b> Total Quarks</button><br><br>
                 <button v-if="!player.hadrons.unl" v-bind:class="{ hadrons: true, unlocked: tmp.qk.gluon.size.gte(hadrons_unl_req), locked: tmp.qk.gluon.size.lt(hadrons_unl_req) }" onclick="unlockHadrons()"><b>Unlock Hadrons</b><br>Req: <b class="gluon shadow">{{formatWhole(hadrons_unl_req)}}m</b> of Gluon</button>
@@ -87,23 +88,32 @@
                 <button v-bind:class="{hadrons: true, unlocked: player.hadrons.amount.gte(tmp.had.boostCost), locked: player.hadrons.amount.lt(tmp.had.boostCost)}" onclick="boostHadrons()">Reset your Hadrons for a Boost<br><br>Cost: <b class="hadrons shadow">{{format(tmp.had.boostCost)}}</b> Hadrons</button>
             </div>
             <div v-if="tabData.normal=='Annihilation'">
-                <button v-bind:class="{ anhReset: true, annihilation: true, unlocked: tmp.anh.gain.gte(1), locked: tmp.anh.gain.lt(1) }" onclick="annihilate()">Annihilate all previous progress to gain <b class="annihilation shadow">{{formatWhole(tmp.anh.gain)}}</b> Annihilation Energy<br><br>Next at Dimensional Depth <b class="prestige shadow">{{formatWhole(tmp.anh.next)}}</b></button><br><br>
+                <button v-if="!player.void.active" v-bind:class="{ anhReset: true, annihilation: true, unlocked: tmp.anh.gain.gte(1), locked: tmp.anh.gain.lt(1) }" onclick="annihilate()">Annihilate all previous progress to gain <b class="annihilation shadow">{{formatWhole(tmp.anh.gain)}}</b> Annihilation Energy<br><br>Next at Dimensional Depth <b class="prestige shadow">{{formatWhole(tmp.anh.next)}}</b></button>
+                <button class="voidReset void unlocked" onclick="enterVoid()" v-if="player.void.active">Exit the Void.</button><br><br>
                 <div v-if="player.annihilation.reached">
                     You have <b class="annihilation shadow">{{formatWhole(player.annihilation.energy)}}</b> Annihilation Energy.<br>
                     You have <b class="annihilation shadow">{{formatWhole(player.annihilation.total)}}</b> Total Annihilation Energy, which makes the Universe's size boost its growth rate by <b class="prestige shadow">{{format(tmp.anh.eff)}}x</b>.<br><br>
                     <table>
                         <tr>
-                            <td v-for="(tab, name) in tabs.anh"><button v-if="tabs.anh[name]()" v-on:click="showTab(name, 'anh')" v-bind:class="{['anh'+name.toLowerCase()]: true, tabbtn: true, unlocked: true}">{{name}}</button></td>
+                            <td v-for="(tab, name) in tabs.anh"><button v-if="tabs.anh[name]()" v-on:click="showTab(name, 'anh')" v-bind:class="{['anh'+((name=='Upgrades' && player.void.active)?'void':name.toLowerCase())]: true, tabbtn: true, unlocked: true}">{{name}}</button></td>
                         </tr>
                     </table><br>
                     <div v-if="tabData.anh=='Upgrades'">
+                        <div v-if="player.void.active">
+                            You have <b class="void shadow">{{format(player.void.fabric)}}</b> Space-Time Fabric (+{{format(tmp.void.stGain)}}/s)<br>
+                            <div style="font-size: 11px;">Void Upgrades can be purchased twice: 1 Purchase = Works in Void, 2 Purchases = Works in & out of Void<br><br></div>
+                        </div>
                         <table>
                             <tr v-for="r in annihilation_upgs.rows">
                                 <td v-for="c in annihilation_upgs.cols" v-if="annihilation_upgs[r*10+c]">
-                                    <button v-if="annihilation_upgs[r*10+c].unl()" v-bind:class="{ annihilation: true, bought: player.annihilation.upgs.includes(r*10+c), unlocked: (player.annihilation.energy.gte(annihilation_upgs[r*10+c].cost)&&!player.annihilation.upgs.includes(r*10+c)), locked: (player.annihilation.energy.lt(annihilation_upgs[r*10+c].cost)&&!player.annihilation.upgs.includes(r*10+c)) }" v-on:click="buyAnnihilationUpg(r*10+c)" style="width: 180px; height: 170px;"><b v-bind:style="annihilation_upgs[r*10+c].size?{ 'font-size': annihilation_upgs[r*10+c].size }:{}">{{annihilation_upgs[r*10+c].desc}}</b><br><span v-if="!player.annihilation.upgs.includes(r*10+c)"><br>Cost: <b class="annihilation shadow">{{formatWhole(annihilation_upgs[r*10+c].cost)}}</b> AE</span><br><span v-if="annihilation_upgs[r*10+c].dispEff">Currently: <b class="annihilation shadow">{{annihilation_upgs[r*10+c].dispEff(tmp.anh.upgs[r*10+c].eff)}}</b></span><span v-if="annihilation_upgs[r*10+c].toggle && hasAnhUpg(r*10+c)">Auto: <input type="checkbox" v-model="player[annihilation_upgs[r*10+c].toggle]"></span></button>
+                                    <button v-if="annihilation_upgs[r*10+c].unl()" v-bind:class="{ annihilation: !tmp.anh.upgs[r*10+c].voidSwitch, void: tmp.anh.upgs[r*10+c].voidSwitch, bought: (tmp.anh.upgs[r*10+c].voidSwitch?(getVoidUpgTier(r*10+c)>1):player.annihilation.upgs.includes(r*10+c)), unlocked: (tmp.anh.upgs[r*10+c].voidSwitch?(player.void.fabric.gte(annihilation_upgs[r*10+c].voidCost[getVoidUpgTier(r*10+c)])&&getVoidUpgTier(r*10+c)<=1):(player.annihilation.energy.gte(annihilation_upgs[r*10+c].cost)&&!player.annihilation.upgs.includes(r*10+c))), locked: (tmp.anh.upgs[r*10+c].voidSwitch?(player.void.fabric.lt(annihilation_upgs[r*10+c].voidCost[getVoidUpgTier(r*10+c)])&&getVoidUpgTier(r*10+c)<=1):(player.annihilation.energy.lt(annihilation_upgs[r*10+c].cost)&&!player.annihilation.upgs.includes(r*10+c))) }" v-on:click="buyAnnihilationUpg(r*10+c)" v-bind:style="{ width: '180px', height: '170px', position: (tmp.anh.upgs[r*10+c].voidSwitch?'relative':'static') }"><b v-bind:style="(tmp.anh.upgs[r*10+c].voidSwitch?annihilation_upgs[r*10+c].voidSize:annihilation_upgs[r*10+c].size)?{ 'font-size': (tmp.anh.upgs[r*10+c].voidSwitch?annihilation_upgs[r*10+c].voidSize:annihilation_upgs[r*10+c].size) }:{}">{{tmp.anh.upgs[r*10+c].voidSwitch?annihilation_upgs[r*10+c].voidDesc:annihilation_upgs[r*10+c].desc}}</b><br><span v-if="tmp.anh.upgs[r*10+c].voidSwitch?(getVoidUpgTier(r*10+c)<2):(!player.annihilation.upgs.includes(r*10+c))"><br>Cost: <b v-bind:class="{ annihilation: !tmp.anh.upgs[r*10+c].voidSwitch, void: tmp.anh.upgs[r*10+c].voidSwitch, text: tmp.anh.upgs[r*10+c].voidSwitch, shadow: !tmp.anh.upgs[r*10+c].voidSwitch }">{{formatWhole(tmp.anh.upgs[r*10+c].voidSwitch?annihilation_upgs[r*10+c].voidCost[getVoidUpgTier(r*10+c)]:annihilation_upgs[r*10+c].cost)}}</b> {{tmp.anh.upgs[r*10+c].voidSwitch?"Space-Time Fabric":"AE"}}</span><br><span v-if="tmp.anh.upgs[r*10+c].voidSwitch?annihilation_upgs[r*10+c].voidDispEff:annihilation_upgs[r*10+c].dispEff">Currently: <b v-bind:class="{ annihilation: !tmp.anh.upgs[r*10+c].voidSwitch, void: tmp.anh.upgs[r*10+c].voidSwitch, text: tmp.anh.upgs[r*10+c].voidSwitch, shadow: !tmp.anh.upgs[r*10+c].voidSwitch }">{{tmp.anh.upgs[r*10+c].voidSwitch?annihilation_upgs[r*10+c].voidDispEff(tmp.anh.upgs[r*10+c].voidEff):annihilation_upgs[r*10+c].dispEff(tmp.anh.upgs[r*10+c].eff)}}</b></span><span v-if="annihilation_upgs[r*10+c].toggle && hasAnhUpg(r*10+c) && !tmp.anh.upgs[r*10+c].voidSwitch">Auto: <input type="checkbox" v-model="player[annihilation_upgs[r*10+c].toggle]"></span><div v-if="tmp.anh.upgs[r*10+c].voidSwitch" style="position: absolute; top: 2px; left: 2px; font-weight: bold;" v-bind:class="{ void: getVoidUpgTier(r*10+c)==0, voidGold: getVoidUpgTier(r*10+c)>0, text: true }">{{getVoidUpgTier(r*10+c)}}</div></button>
                                 </td>
                             </tr>
-                        </table>
+                            <tr>
+                                <td v-for="x in void_anh_upgs"><button v-if="annihilation_upgs[x].unl() && getVoidUpgTier(x)>=2 && !player.void.active" class="void bought" style="width: 180px; height: 170px;"><b v-bind:style="annihilation_upgs[x].voidSize?{ 'font-size': annihilation_upgs[x].voidSize }:{}">{{annihilation_upgs[x].voidDesc}}</b><br><br><span v-if="annihilation_upgs[x].voidDispEff">Currently: <b class="void text">{{annihilation_upgs[x].voidDispEff(tmp.anh.upgs[x].voidEff)}}</b></span></button></td>
+                            </tr>
+                        </table><br>
+                        <button v-if="!player.void.unl" v-bind:class="{ void: true, unlocked: canUnlockVoid(), locked: !canUnlockVoid() }" onclick="unlockVoid()"><b>Unlock Void</b><br>Req: Depth <b class="prestige shadow">{{formatWhole(voidReqs[0])}}</b> & <b class="annihilation shadow">{{formatWhole(voidReqs[1])}}</b> AE</button>
                     </div>
                     <div v-if="tabData.anh=='Boosts'">
                         <b>WARNING: Switching Annihilation Boosts forces an Annihilation reset!</b><br>
@@ -117,6 +127,14 @@
                             <tr>
                                 <td v-if="player.annihilation.total.gte(3)" v-bind:class="{ anhBoostDiv: true, active: player.annihilation.activeBoosts.includes(3), inactive: !player.annihilation.activeBoosts.includes(3) }"><h2>Annihilation Boost III</h2>Makes Total Universal Upgrade Level add extra Hadronic Boosters.<br><br>Currently: +{{format(tmp.anh.boosts[3])}}<br><br><button v-bind:class="{ anhboosts: true, unlocked: (player.annihilation.activeBoosts.includes(3)||tmp.anh.boosts.can), locked: !(player.annihilation.activeBoosts.includes(3)||tmp.anh.boosts.can), mini: true }" onclick="toggleAnhBoost(3)"><b>{{player.annihilation.activeBoosts.includes(3)?"ACTIVE":"INACTIVE"}}</b></button></td>
                             </tr>
+                        </table>
+                    </div>
+                    <div v-if="tabData.anh=='Void'">
+                        You have <b class="void shadow">{{format(player.void.fabric)}}</b> Space-Time Fabric <span v-if="player.void.active">(+{{format(tmp.void.stGain)}}/s)</span><br><br>
+                        <div style="font-size: 11px; margin-bottom: 5px;">In the Void, all Universal Upgrades are disabled, and Annihilation Upgrades are replaced by Void Upgrades.<br>Space-Time Fabric is gained based on your Universe's size, but slows down over time since last Dimensional Depth<br><br></div>
+                        <button class="voidReset void unlocked" onclick="enterVoid()" v-if="!player.void.active">Enter the Void.</button><span v-if="!player.void.active"><br><br></span>
+                        <table>
+                            <tr v-for="x in void_rep_upgs.amt"><td><button v-bind:class="{ void: true, unlocked: player.void.fabric.gte(tmp.void.upgs[x].cost), locked: player.void.fabric.lt(tmp.void.upgs[x].cost) }" v-on:click="buyVoidRepUpg(x)" style="width: 500px;"><b style="font-size: 20px;" class="void text">{{void_rep_upgs[x].title}}<br></b>{{void_rep_upgs[x].desc}}<br>Cost: <b class="void text">{{format(tmp.void.upgs[x].cost)}}</b> Space-Time Fabric<br><br>Level: <b class="void text">{{formatWhole(tmp.void.upgs[x].lvl)}}</b><br>Currently: <b class="void text">{{void_rep_upgs[x].dispEff(tmp.void.upgs[x].eff)}}</b></button></td></tr>
                         </table>
                     </div>
                 </div>

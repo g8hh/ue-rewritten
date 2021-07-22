@@ -15,11 +15,12 @@ const tabs = {
         Universe() { return true },
         Quarks() { return player.quarks.unl },
         Hadrons() { return player.hadrons.unl },
-        Annihilation() { return player.depth.gte(tmp.anh.req)||player.annihilation.reached },
+        Annihilation() { return player.depth.gte(anhBaseReq)||player.annihilation.reached },
     },
     anh: {
         Upgrades() { return player.annihilation.reached },
         Boosts() { return player.annihilation.reached },
+        Void() { return player.void.unl },
     },
 }
 
@@ -43,6 +44,7 @@ function startPlayer() { return {
     quarks: playerQuarksData(),
     hadrons: playerHadronsData(),
     annihilation: playerAnnihilationData(),
+    void: playerVoidData(),
 }}
 
 function save() {
@@ -73,6 +75,7 @@ function fixObj(obj, start) {
 
 function transformPlayerToDecimal() {
     for (let x in player.upgs) player.upgs[x] = new Decimal(player.upgs[x])
+    for (let x in player.void.repUpgs) player.void.repUpgs[x] = new Decimal(player.void.repUpgs[x])
 }
 
 function hardReset() {
@@ -156,6 +159,14 @@ function loadVue() {
             annihilation_upgs,
             buyAnnihilationUpg,
             hasAnhUpg,
+            canUnlockVoid,
+            voidReqs,
+            displayCompactionSizeGain,
+            getVoidUpgTier,
+            void_rep_upgs,
+            buyVoidRepUpg,
+            voidUpgActive,
+            void_anh_upgs,
         },
     })
 }

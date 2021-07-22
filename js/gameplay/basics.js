@@ -12,6 +12,8 @@ function gameLoop(diff) {
         boostHadrons(true, true)
     }
     if (player.autoUU && hasAnhUpg(26)) maxAllUniUpgs(true);
+    
+    if (player.void.active) voidLoop(diff);
 }
 
 function getSize(time) {
@@ -21,10 +23,33 @@ function getSize(time) {
     return size;
 }
 
+function displayCompactionSizeGain() {
+    let t = player.time;
+    let b = tmp.sizeBase;
+    let s = tmp.slowdown.start;
+    let p = tmp.slowdown.power;
+    let c = tmp.compaction.start;
+    let w = tmp.compaction.power;
+    
+    if (b.pow(t).gte(s)) {
+        let N1 = b.log10().times(t).sub(c.log10().times(p)).plus(s.log10().times(p.sub(1)))
+        let D1 = p.times(w);
+        let N2 = N1.div(D1).plus(1).pow(Decimal.div(1, w).sub(1)).times(c).times(b.log10())
+        let D2 = p.times(w.pow(2))
+        return N2.div(D2)
+    } else {
+        let N1 = b.log10().times(t).sub(c.log10())
+        let N2 = N1.div(w).plus(1).pow(Decimal.pow(1, w).sub(1)).times(c).times(b.log10())
+        let D2 = w.pow(2)
+        return N2.div(D2)
+    }
+}
+
 function getSizeBase() {
     let base = Decimal.pow(1.01, tmp.prestige.eff)
     if (player.quarks.unl) base = base.pow(tmp.qk.gluon.eff)
     if (player.annihilation.reached) base = base.pow(tmp.anh.eff)
+    if (player.void.unl) base = base.pow(tmp.void.upgs[1].eff);
     return base;
 }
 

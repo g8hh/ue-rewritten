@@ -1,5 +1,6 @@
 function updateTemp() {
     updateTempAnnihilation();
+    updateTempVoid();
     updateTempUniverseUpgs();
     updateTempHadrons();
     updateTempQuarks();
@@ -41,6 +42,7 @@ function updateTempUniverseUpgs() {
 }
 
 function updateTempQuarks() {
+
     tmp.qk = {
         eff: {
             addedCharge: tmp.upgs[21].eff,
@@ -52,9 +54,9 @@ function updateTempQuarks() {
 
     tmp.qk.eff.charge = player.quarks.charge.div(10).plus(1),
 
-    tmp.qk.eff.red = player.quarks.red.plus(1).log10().plus(1).pow(tmp.qk.eff.charge.plus(tmp.qk.eff.addedCharge.sub(1)).times(tmp.had.boostEff).times(tmp.qk.eff.multiplyExp)).div(20);
-    tmp.qk.eff.green = player.quarks.green.plus(1).log10().plus(1).pow(tmp.qk.eff.charge.plus(tmp.qk.eff.addedCharge.sub(1)).times(tmp.had.boostEff).times(tmp.qk.eff.multiplyExp)).div(30);
-    tmp.qk.eff.blue = player.quarks.blue.plus(1).log10().plus(1).pow(tmp.qk.eff.charge.plus(tmp.qk.eff.addedCharge.sub(1)).times(tmp.had.boostEff).times(tmp.qk.eff.multiplyExp)).div(10);
+    tmp.qk.eff.red = softcapQKAmt(player.quarks.red).plus(1).log10().plus(1).pow(tmp.qk.eff.charge.plus(tmp.qk.eff.addedCharge.sub(1)).times(tmp.had.boostEff).times(tmp.qk.eff.multiplyExp)).div(20)
+    tmp.qk.eff.green = softcapQKAmt(player.quarks.green).plus(1).log10().plus(1).pow(tmp.qk.eff.charge.plus(tmp.qk.eff.addedCharge.sub(1)).times(tmp.had.boostEff).times(tmp.qk.eff.multiplyExp)).div(30)
+    tmp.qk.eff.blue = softcapQKAmt(player.quarks.blue).plus(1).log10().plus(1).pow(tmp.qk.eff.charge.plus(tmp.qk.eff.addedCharge.sub(1)).times(tmp.had.boostEff).times(tmp.qk.eff.multiplyExp)).div(10)
 
     tmp.qk.gain = { mult: getGlobalQKGainMult() };
     tmp.qk.gain.red = getQuarkGain("red").times(tmp.qk.gain.mult)
@@ -65,6 +67,7 @@ function updateTempQuarks() {
         size: getGluonSizeRatio().times(getGluonProportionSize()),
     }
     tmp.qk.gluon.eff = getGluonEff()
+    tmp.glu = tmp.qk.gluon.eff;
 }
 
 function updateTempHadrons() {
@@ -83,6 +86,15 @@ function updateTempHadrons() {
 
 function updateTempAnnihilation() {
     tmp.anh = {};
+    tmp.anh.upgs = {};
+    for (let r=1;r<=annihilation_upgs.rows;r++) for (let c=1;c<=annihilation_upgs.cols;c++) {
+        let id = r*10+c;
+        if (!annihilation_upgs[id]) continue;
+        tmp.anh.upgs[id] = {};
+        if (annihilation_upgs[id].eff) tmp.anh.upgs[id].eff = annihilation_upgs[id].eff();
+        tmp.anh.upgs[id].voidSwitch = player.void.active && !annihilation_upgs[id].keepVoid
+        if (annihilation_upgs[id].voidEff) tmp.anh.upgs[id].voidEff = annihilation_upgs[id].voidEff()
+    }
     tmp.anh.gain = getAnhGain();
     tmp.anh.next = getAnhNext();
     tmp.anh.eff = player.size.max(1).log10().plus(1).times(player.annihilation.total).plus(1).log10().plus(1).pow(2)
@@ -90,11 +102,16 @@ function updateTempAnnihilation() {
     tmp.anh.boosts.can = canGetAnhBoost();
     tmp.anh.boosts.power = getAnhBoostPow();
     for (let i=1;i<=3;i++) tmp.anh.boosts[i] = getAnhBoostEff(i);
-    tmp.anh.upgs = {};
-    for (let r=1;r<=annihilation_upgs.rows;r++) for (let c=1;c<=annihilation_upgs.cols;c++) {
-        let id = r*10+c;
-        if (!annihilation_upgs[id]) continue;
-        tmp.anh.upgs[id] = {};
-        if (annihilation_upgs[id].eff) tmp.anh.upgs[id].eff = annihilation_upgs[id].eff();
+}
+
+function updateTempVoid() {
+    tmp.void = {};
+    tmp.void.upgs = {};
+    for (let id=1;id<=void_rep_upgs.amt;id++) {
+        var data = { lvl: player.void.repUpgs[id]||new Decimal(0) };
+        tmp.void.upgs[id] = data;
+        data.cost = void_rep_upgs[id].cost(data.lvl);
+        data.eff = void_rep_upgs[id].eff(data.lvl);
     }
+    tmp.void.stGain = getSTFabricGain();
 }

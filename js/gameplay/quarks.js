@@ -18,6 +18,7 @@ function unlockQuarks() {
 function getGlobalQKGainMult() {
     let mult = new Decimal(1)
     if (hasAnhUpg(21)) mult = tmp.anh.upgs[21].eff
+    if (voidUpgActive(16) && player.quarks.unl && tmp.glu) mult = mult.times(tmp.glu);
     return mult;
 }
 
@@ -79,7 +80,7 @@ function getGluonSizeRatio() {
 function getGluonEff() {
     let size = tmp.qk.gluon.size;
     if (size.gte(300)) size = Decimal.pow(300, size.log(300).cbrt().plus(1)).sqrt();
-    return size.times(2).plus(1).log2().plus(1).log2().times(tmp.upgs[31].eff.mul.plus(1).pow(tmp.upgs[31].eff.pow.div(2).times(tmp.had.boostEff.min(1.75))).times(tmp.had.boostEff.max(1.75).sub(.75)))
+    return size.times(2).plus(1).log2().plus(1).log2().max(1).times(tmp.upgs[31].eff.mul.plus(1).pow(tmp.upgs[31].eff.pow.div(2).times(tmp.had.boostEff.min(1.75))).times(tmp.had.boostEff.max(1.75).sub(.75)))
 }
 
 function getGluonProportionSize() {
@@ -87,4 +88,10 @@ function getGluonProportionSize() {
     if (size.gte(1e6)) size = Decimal.pow(1e6, size.log(1e6).sqrt());
     if (size.gte(1e4)) size = size.times(1e8).cbrt();
     return size;
+}
+
+function softcapQKAmt(x) {
+    if (x.gte(1e100)) x = x.times(1e100).sqrt();
+    if (x.gte(1e50)) x = Decimal.pow(1e50, x.log(1e50).sqrt());
+    return x;
 }

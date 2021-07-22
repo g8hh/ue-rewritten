@@ -21,7 +21,7 @@ const universe_upgs = {
         },
     },
     11: {
-        unl() { return player.upgsUnl },
+        unl() { return player.upgsUnl&&!player.void.active },
         desc: "Dimensional Depths lower their goal.",
         extra() { return tmp.upgs.addNine },
         cost(l) { return l.div(3).plus(1).pow(2).floor() },
@@ -30,7 +30,7 @@ const universe_upgs = {
         dispEff(e) { return "-"+format(e)+" depths" },
     }, 
     12: {
-        unl() { return player.upgsUnl },
+        unl() { return player.upgsUnl&&!player.void.active },
         desc() { return "Universal Slowdown starts "+format(tmp.upgs[23].eff.plus(0.2))+"m<sup>3</sup> later." },
         extra() { return tmp.upgs.addNine },
         cost(l) { return l.div(2.5).plus(1).pow(2.1).plus(1).floor() },
@@ -39,7 +39,7 @@ const universe_upgs = {
         dispEff(e) { return format(e)+"m<sup>3</sup> later" },
     },
     13: {
-        unl() { return player.upgsUnl },
+        unl() { return player.upgsUnl&&!player.void.active },
         desc: "Improve the Dimensional Depth effect.",
         extra() { return tmp.upgs[42].eff.plus(tmp.upgs.addNine) },
         cost(l) { return l.div(2).plus(1).pow(2.2).plus(2).floor() },
@@ -52,7 +52,7 @@ const universe_upgs = {
         dispEff(e) { return "^"+format(e) },
     },
     21: {
-        unl() { return player.quarks.unl },
+        unl() { return player.quarks.unl&&!player.void.active },
         desc: "Add 10% to the Quark Charge effect.",
         extra() { return tmp.upgs.addNine },
         cost(l) { return l.div(1.5).plus(1).pow(2.3).plus(3).floor() },
@@ -61,7 +61,7 @@ const universe_upgs = {
         dispEff(e) { return "+"+format(e.sub(1).times(100))+"%" },
     },
     22: {
-        unl() { return player.quarks.unl },
+        unl() { return player.quarks.unl&&!player.void.active },
         desc: "The Gluon grows 50% faster.",
         extra() { return tmp.upgs.addNine },
         cost(l) { return l.plus(1).pow(2.4).plus(4).floor() },
@@ -70,7 +70,7 @@ const universe_upgs = {
         dispEff(e) { return format(e.sub(1).times(100))+"% faster" },
     },
     23: {
-        unl() { return player.quarks.unl },
+        unl() { return player.quarks.unl&&!player.void.active },
         desc: "Total Quarks add to Universe Upgrade 2's base.",
         extra() { return tmp.upgs.addNine },
         cost(l) { return l.times(1.5).plus(1).pow(2.5).plus(5).floor() },
@@ -79,7 +79,7 @@ const universe_upgs = {
         dispEff(e) { return "+"+format(e) },
     },
     31: {
-        unl() { return player.hadrons.unl },
+        unl() { return player.hadrons.unl&&!player.void.active },
         desc: "The Gluon's effect is stronger based on your Hadrons.",
         extra() { return tmp.upgs.addNine },
         cost(l) { return l.times(2).plus(1).pow(2.6).plus(6).floor() },
@@ -94,7 +94,7 @@ const universe_upgs = {
         dispEff(e) { return "^"+format(e.pow)+(e.mul.gt(1)?(", x"+format(e.mul)):"") },
     },
     32: {
-        unl() { return player.hadrons.unl },
+        unl() { return player.hadrons.unl&&!player.void.active },
         desc: "The Gluon boosts Hadron gain",
         extra() { return tmp.upgs.addNine },
         cost(l) { return l.times(2.5).plus(1).pow(2.7).plus(7).floor() },
@@ -103,7 +103,7 @@ const universe_upgs = {
         dispEff(e) { return format(e)+"x" },
     },
     33: {
-        unl() { return player.hadrons.unl },
+        unl() { return player.hadrons.unl&&!player.void.active },
         desc: "Universal Compaction starts later.",
         extra() { return tmp.upgs.addNine },
         cost(l) { return l.times(3).plus(1).pow(2.8).plus(8).floor() },
@@ -112,7 +112,7 @@ const universe_upgs = {
         dispEff(e) { return format(e)+"x later" },
     },
     41: {
-        unl() { return player.hadrons.boosters.gte(4)||hasAnhUpg(15) },
+        unl() { return (player.hadrons.boosters.gte(4)||hasAnhUpg(15))&&!player.void.active },
         desc: "Red Quarks cheapen Quark Charge.",
         cost(l) { return l.times(3.5).plus(1).pow(2.9).plus(9).floor() },
         target(r) { return r.sub(9).max(0).root(2.9).sub(1).div(3.5).plus(1).max(0).floor() },
@@ -120,7 +120,7 @@ const universe_upgs = {
         dispEff(e) { return "/"+format(e) },
     },
     42: {
-        unl() { return player.hadrons.boosters.gte(4)||hasAnhUpg(15) },
+        unl() { return (player.hadrons.boosters.gte(4)||hasAnhUpg(15))&&!player.void.active },
         desc: "Green Quarks give free levels to Universe Upgrade 3.",
         cost(l) { return l.times(4).plus(1).pow(3).plus(10).floor() },
         target(r) { return r.sub(10).max(0).cbrt().sub(1).div(4).plus(1).max(0).floor() },
@@ -128,7 +128,7 @@ const universe_upgs = {
         dispEff(e) { return "+"+format(e) },
     },
     43: {
-        unl() { return player.hadrons.boosters.gte(4)||hasAnhUpg(15) },
+        unl() { return (player.hadrons.boosters.gte(4)||hasAnhUpg(15))&&!player.void.active },
         desc: "Blue Quarks strengthen Universe Upgrade 1.",
         cost(l) { return l.times(4.5).plus(1).pow(3.1).plus(11).floor() },
         target(r) { return r.sub(11).max(0).root(3.1).sub(1).div(4.5).plus(1).max(0).floor() },
@@ -141,14 +141,29 @@ const universe_upgs = {
     },
 }
 
-function getPrestigeReq() { return Decimal.pow(1.05, player.depth.sub(tmp.upgs[11].eff).div(3).plus(1).pow(3).plus(1)) }
+function divPrestigeReq() {
+    let div = new Decimal(1);
+    if (voidUpgActive(11)) div = div.times(tmp.anh.upgs[11].voidEff);
+    return div;
+}
+function getPrestigeReq() { return Decimal.pow(1.05, player.depth.sub(tmp.upgs[11].eff).div(3).plus(1).pow(3).plus(1)).div(divPrestigeReq()) }
+function getPrestigeTarg() { return player.size.times(divPrestigeReq()).log(1.05).sub(1).cbrt().sub(1).times(3).plus(tmp.upgs[11].eff).plus(1).max(0).floor() }
 
 function prestige(force=false, auto=false) {
     if (!force) {
         if (!auto) tmp.prestige.req = getPrestigeReq();
         if (player.size.lt(tmp.prestige.req)) return;
-        player.depth = player.depth.plus(1);
-        player.essence = player.essence.plus(player.depth.times(getUniverseEssenceGainMult()));
+        if (voidUpgActive(24)) {
+            let targ = getPrestigeTarg();
+            if (targ.lte(player.depth)) return;
+            let s = player.depth.plus(1);
+            let d = targ;
+            player.depth = player.depth.max(targ);
+            player.essence = player.essence.plus(getUniverseEssenceGainMult().div(2).times(d.sub(s).plus(1)).times(d.plus(s)))
+        } else {
+            player.depth = player.depth.plus(1);
+            player.essence = player.essence.plus(player.depth.times(getUniverseEssenceGainMult()));
+        }
     }
 
     if (!hasAnhUpg(25)) {
@@ -164,6 +179,7 @@ function prestige(force=false, auto=false) {
 function getUniverseEssenceGainMult() {
     let mult = new Decimal(1);
     if (hasAnhUpg(11)) mult = mult.times(tmp.anh.upgs[11].eff);
+    if (player.void.unl) mult = mult.times(tmp.void.upgs[1].eff);
     return mult;
 }
 

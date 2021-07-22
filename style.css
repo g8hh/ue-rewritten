@@ -156,7 +156,7 @@ tr, .tableRow {
     text-shadow: 0.166667em 0.166667em 0.3333333em rgb(69, 171, 255), 0.3333333em 0.3333333em 0.66666667em rgb(100, 0, 139);
 }
 
-.unlocked:not(.quarks):not(.annihilation) > .prestige.shadow {
+.unlocked:not(.quarks):not(.annihilation):not(.void) > .prestige.shadow {
     color: rgb(45, 91, 97);
     text-shadow: 0.166667em 0.166667em 0.3333333em rgb(24, 57, 94), 0.3333333em 0.3333333em 0.66666667em rgb(39, 1, 71);
 }
@@ -326,7 +326,7 @@ tr, .tableRow {
 
 .anhReset {
     width: 200px;
-    height: 150px;
+    height: 160px;
 }
 
 .anhboosts.unlocked {
@@ -364,3 +364,61 @@ tr, .tableRow {
 
 .anhBoostDiv.active { background-color: rgba(158, 142, 0, 0.5); }
 .anhBoostDiv.inactive { background-color: rgba(99, 96, 72, 0.5); }
+
+.void.unlocked, .anhvoid.unlocked {
+    color: white;
+    background: radial-gradient(ellipse, rgb(77, 0, 77) 0%, black 80%);
+    border: 2px solid rgba(174, 0, 255, 0.4);
+    padding: 5px 5px 5px 5px;
+}
+
+.void.unlocked:hover, .anhvoid.unlocked:hover {
+    filter: brightness(180%);
+}
+
+.void.locked, .anhvoid.locked {
+    color: white;
+    background-color: rgb(53, 44, 59);
+    border: 2px solid rgba(174, 0, 255, 0.4);
+    padding: 5px 5px 5px 5px;
+}
+
+.void.locked:hover, .anhvoid.locked:hover {
+    filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(-45deg);
+}
+
+.void.bought {
+    color: white;
+    background: radial-gradient(ellipse, rgb(11, 56, 0) 0%, black 80%);
+    border: 2px solid rgba(11, 129, 0, 0.4);
+    padding: 5px 5px 5px 5px;
+}
+
+.voidReset {
+    width: 150px;
+    height: 120px;
+}
+
+.void.text, .void.shadow {
+    background: radial-gradient(ellipse, rgb(169, 0, 221) 0%, rgb(98, 69, 100) 100%);
+    background-size: 1em 1em;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.void.text, .voidGold.text {
+    text-shadow: 0.1em 0.1em 0.2em rgba(255, 255, 255, 0.2), 0.05em 0.05em 0.1em rgba(255, 255, 255, 0.1);
+}
+
+.voidGold.text {
+    background: radial-gradient(ellipse, rgb(221, 217, 0) 0%, rgb(100, 81, 69) 100%);
+    background-size: 1em 1em;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.void.shadow {
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgba(255, 255, 255, 0.5), 0.3333333em 0.3333333em 0.66666667em rgba(255, 255, 255, 0.2);
+}
