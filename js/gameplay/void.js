@@ -32,12 +32,19 @@ function voidUpgActive(id) {
     else return true;
 }
 
+function getSTFabricGainSlowdownPower() {
+    let power = new Decimal(1)
+    if (voidUpgActive(35)) power = Decimal.sub(1, tmp.anh.upgs[35].voidEff)
+    return power;
+}
+
 function getSTFabricGain() {
-    let gain = Decimal.pow(2, player.size.log2().sqrt()).sub(1).div(player.time.div(4).plus(1).sqrt().times(10));
+    let gain = Decimal.pow(2, player.size.log2().sqrt()).sub(1).div(player.time.times(getSTFabricGainSlowdownPower()).div(4).plus(1).sqrt().times(10));
     gain = gain.times(tmp.void.upgs[2].eff);
     if (voidUpgActive(12)) gain = gain.times(tmp.anh.upgs[12].voidEff);
     if (voidUpgActive(21)) gain = gain.times(tmp.anh.upgs[21].voidEff);
     if (voidUpgActive(24)) gain = gain.times(tmp.anh.upgs[24].voidEff.stf);
+    if (voidUpgActive(36)) gain = gain.times(tmp.anh.upgs[36].voidEff);
     return gain;
 }
 
@@ -71,6 +78,12 @@ const void_rep_upgs = {
         eff(l) { return Decimal.pow(3, l) },
         dispEff(e) { return formatWhole(e)+"x" },
     },
+}
+
+function getVoidRepUpgPower() {
+    let power = new Decimal(1);
+    if (voidUpgActive(32)) power = power.times((hasAnhUpg(31)&&getVoidUpgTier(32)>1)?1.25:1.2)
+    return power;
 }
 
 function buyVoidRepUpg(x, auto=false) {

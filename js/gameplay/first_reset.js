@@ -114,6 +114,7 @@ const universe_upgs = {
     41: {
         unl() { return (player.hadrons.boosters.gte(4)||hasAnhUpg(15))&&!player.void.active },
         desc: "Red Quarks cheapen Quark Charge.",
+        extra() { return hasAnhUpg(35)?tmp.upgs.addNine:new Decimal(0) },
         cost(l) { return l.times(3.5).plus(1).pow(2.9).plus(9).floor() },
         target(r) { return r.sub(9).max(0).root(2.9).sub(1).div(3.5).plus(1).max(0).floor() },
         eff(l) { return player.quarks.red.plus(1).log10().plus(1).pow(l) },
@@ -122,6 +123,7 @@ const universe_upgs = {
     42: {
         unl() { return (player.hadrons.boosters.gte(4)||hasAnhUpg(15))&&!player.void.active },
         desc: "Green Quarks give free levels to Universe Upgrade 3.",
+        extra() { return hasAnhUpg(35)?tmp.upgs.addNine:new Decimal(0) },
         cost(l) { return l.times(4).plus(1).pow(3).plus(10).floor() },
         target(r) { return r.sub(10).max(0).cbrt().sub(1).div(4).plus(1).max(0).floor() },
         eff(l) { return player.quarks.green.plus(1).log10().plus(1).log2().times(l) },
@@ -130,6 +132,7 @@ const universe_upgs = {
     43: {
         unl() { return (player.hadrons.boosters.gte(4)||hasAnhUpg(15))&&!player.void.active },
         desc: "Blue Quarks strengthen Universe Upgrade 1.",
+        extra() { return hasAnhUpg(35)?tmp.upgs.addNine:new Decimal(0) },
         cost(l) { return l.times(4.5).plus(1).pow(3.1).plus(11).floor() },
         target(r) { return r.sub(11).max(0).root(3.1).sub(1).div(4.5).plus(1).max(0).floor() },
         eff(l) { 
@@ -159,7 +162,8 @@ function prestige(force=false, auto=false) {
             let s = player.depth.plus(1);
             let d = targ;
             player.depth = player.depth.max(targ);
-            player.essence = player.essence.plus(getUniverseEssenceGainMult().div(2).times(d.sub(s).plus(1)).times(d.plus(s)))
+            if ((voidUpgActive(14)||voidUpgActive(16))&&hasAnhUpg(22)) setUniverseEssence();
+            else player.essence = player.essence.plus(getUniverseEssenceGainMult().div(2).times(d.sub(s).plus(1)).times(d.plus(s)))
         } else {
             player.depth = player.depth.plus(1);
             player.essence = player.essence.plus(player.depth.times(getUniverseEssenceGainMult()));
@@ -184,8 +188,13 @@ function getUniverseEssenceGainMult() {
 }
 
 function loadUniverseEssenceAmt(old, n) {
-    if (hasAnhUpg(22)) player.essence = player.essence.div(old).times(n)
+    if ((voidUpgActive(14)||voidUpgActive(16))&&hasAnhUpg(22)) setUniverseEssence()
+    else if (hasAnhUpg(22)) player.essence = player.essence.div(old).times(n)
     else player.essence = player.essence.plus(player.spentEssence).div(old).times(n).sub(player.spentEssence)
+}
+
+function setUniverseEssence() {
+    player.essence = getUniverseEssenceGainMult().div(2).times(player.depth.plus(1)).times(player.depth)
 }
 
 function getDepthEff() { return player.depth.times(3).cbrt().plus(1).pow(tmp.upgs[13].eff) }
@@ -241,5 +250,6 @@ function adjustUniUpgCost(x, rev=false) {
         if (x.gte(250)) x = x.pow(2).div(100).sub(375)
     }
 
+    if (hasAnhUpg(34)) x = rev?x.times(tmp.anh.upgs[34].eff):x.div(tmp.anh.upgs[34].eff);
     return x;
 }

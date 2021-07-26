@@ -9,6 +9,11 @@ function playerAnnihilationData() { return {
     activeBoosts: [],
 }}
 
+function getAnhGainExp() {
+    let exp = new Decimal(1);
+    if (player.photons.unl) exp = exp.plus(tmp.ph.col[0].eff.eff);
+    return exp;
+}
 function getAnhGainMult() {
     let mult = new Decimal(1);
     if (player.void.unl && tmp.void) mult = mult.times(tmp.void.upgs[3].eff);
@@ -19,11 +24,11 @@ function getAnhGain() {
     let d = player.depth;
     let base = d.sub(anhBaseReq).div(anhReqDiv)
     if (base.lt(0)) return new Decimal(0);
-    else return Decimal.pow(2, base.root(1.1)).times(getAnhGainMult()).floor() 
+    else return Decimal.pow(2, base.root(1.1).times(getAnhGainExp())).times(getAnhGainMult()).floor() 
 };
 function getAnhNext() { 
-    let next = tmp.anh.gain.plus(1).div(tmp.anh.gain.eq(0)?1:getAnhGainMult()).log2().pow(1.1).times(anhReqDiv).plus(anhBaseReq)
-    return next.ceil() 
+    let next = tmp.anh.gain.plus(1).div(tmp.anh.gain.eq(0)?1:getAnhGainMult()).log2().div(getAnhGainExp()).pow(1.1).times(anhReqDiv).plus(anhBaseReq)
+    return next.ceil().max(player.depth.plus(1))
 };
 
 function annihilate(force=false, auto=false) {
@@ -52,7 +57,10 @@ function annihilate(force=false, auto=false) {
 }
 
 function getAnhBoostPow() {
-    return new Decimal(1);
+    let pow = new Decimal(1);
+    if (player.photons.unl) pow = tmp.ph.col[1].eff.eff;
+    if (hasAnhUpg(32)) pow = pow.plus(tmp.anh.upgs[32].eff);
+    return pow;
 }
 
 function getAnhBoostEff(x) {
@@ -63,7 +71,7 @@ function getAnhBoostEff(x) {
     else return tmp.upgs?tmp.upgs.totalLvl.plus(1).log10().div(2).times(power).root(4):new Decimal(0)
 }
 
-function getAnhBoostLimit() { return hasAnhUpg(26)?2:1 }
+function getAnhBoostLimit() { return hasAnhUpg(33)?3:(hasAnhUpg(26)?2:1) }
 function canGetAnhBoost() { return player.annihilation.activeBoosts.length<getAnhBoostLimit() }
 
 function toggleAnhBoost(x) {
@@ -75,7 +83,7 @@ function toggleAnhBoost(x) {
 }
 
 const annihilation_upgs = {
-    rows: 2,
+    rows: 3,
     cols: 6,
     11: {
         unl() { return player.annihilation.reached },
@@ -86,7 +94,7 @@ const annihilation_upgs = {
 
         voidDesc: "Space-Time Fabric reduces the Dimensional Depth requirement.",
         voidCost: [new Decimal(10), new Decimal(1e9)],
-        voidEff() { return Decimal.pow(10, player.void.fabric.plus(1).log10().sqrt()).sqrt() },
+        voidEff() { return Decimal.pow(10, player.void.fabric.plus(1).log10().sqrt().times((hasAnhUpg(31)&&getVoidUpgTier(11)>1)?1.25:1)).sqrt() },
         voidDispEff(e) { return "/"+format(e) },
         voidSize: "0.95em",
     },
@@ -98,8 +106,8 @@ const annihilation_upgs = {
         dispEff(e) { return format(e)+"x" },
 
         voidDesc: "Universe Essence boosts Space-Time Fabric gain.",
-        voidCost: [new Decimal(32), new Decimal(1/0)],
-        voidEff() { return player.essence.div(10).plus(1).sqrt() },
+        voidCost: [new Decimal(32), new Decimal(1e17)],
+        voidEff() { return player.essence.div(10).plus(1).sqrt().times((hasAnhUpg(31)&&getVoidUpgTier(12)>1)?1.25:1) },
         voidDispEff(e) { return format(e)+"x" },
     },
     13: {
@@ -113,7 +121,7 @@ const annihilation_upgs = {
         desc: "The Gluon & Hadrons grow 10x as fast.",
         cost: new Decimal(2),
 
-        voidDesc: "Hadrons' nerf to their own production is 50% weaker.",
+        voidDesc() { return "Hadrons' nerf to their own production is "+((hasAnhUpg(31)&&getVoidUpgTier(14)>1)?"67":"50")+"% weaker." },
         voidCost: [new Decimal(5e3), new Decimal(5e13)],
     },
     15: {
@@ -140,8 +148,8 @@ const annihilation_upgs = {
         dispEff(e) { return format(e)+"x" },
 
         voidDesc: "Space-Time Fabric boosts its own gain.",
-        voidCost: [new Decimal(1e4), new Decimal(1/0)],
-        voidEff() { return player.void.fabric.plus(1).root(player.void.fabric.plus(1).log10().plus(1).sqrt()) },
+        voidCost: [new Decimal(1e4), new Decimal(1e18)],
+        voidEff() { return player.void.fabric.plus(1).root(player.void.fabric.plus(1).log10().plus(1).sqrt().div((hasAnhUpg(31)&&getVoidUpgTier(21)>1)?1.25:1)) },
         voidDispEff(e) { return format(e)+"x" },
     },
     22: {
@@ -168,10 +176,14 @@ const annihilation_upgs = {
 
         voidDesc: "You get Depths in bulk, and AE & Space-Time Fabric boost each other's gain.",
         voidCost: [new Decimal(4e9), new Decimal(1.5e14)],
-        voidEff() { return {
-            ae: player.void.fabric.plus(1).log10().plus(1),
-            stf: player.annihilation.energy.plus(1).log10().plus(1).pow(2),
-        }},
+        voidEff() { 
+            let exp = new Decimal((hasAnhUpg(31)&&getVoidUpgTier(24)>1)?1.25:1)
+            if (player.photons.unl) exp = exp.times(tmp.ph.col[5].eff.eff);
+            return {
+                ae: player.void.fabric.plus(1).log10().plus(1).pow(exp),
+                stf: player.annihilation.energy.plus(1).log10().plus(1).pow(exp.times(2)),
+            }
+        },
         voidDispEff(e) { return format(e.ae)+"x AE, "+format(e.stf)+"x Fabric" },
         voidSize: "0.85em",
     },
@@ -190,11 +202,74 @@ const annihilation_upgs = {
         toggle: "autoUU",
         keepVoid: true,
     },
+    31: {
+        unl() { return player.photons.unl && player.annihilation.upgs.length>=11 },
+        desc: "Void Upgrades are 25% stronger when bought twice.",
+        cost: new Decimal(5e8),
+        keepVoid: true,
+    },
+    32: {
+        unl() { return player.photons.unl && player.annihilation.upgs.length>=12 },
+        desc: "Space-Time Fabric strengthens Annihilation Boosts.",
+        cost: new Decimal(1e10),
+        eff() { return player.void.fabric.plus(1).log10().plus(1).log(5) },
+        dispEff(e) { return "+"+format(e.times(100))+"%" },
+
+        voidDesc() { return "Rebuyable Void Upgrades are "+((hasAnhUpg(31)&&getVoidUpgTier(32)>1)?"25":"20")+"% stronger." },
+        voidCost: [new Decimal(1e24), new Decimal(2e37)],
+    },
+    33: {
+        unl() { return player.photons.unl && player.annihilation.upgs.length>=13 },
+        desc: "You can activate 3 Annihilation Boosts at once.",
+        cost: new Decimal(1e12),
+        keepVoid: true,
+    },
+    34: {
+        unl() { return player.photons.unl && player.annihilation.upgs.length>=14 },
+        desc: "All Universal Upgrades are cheaper based on your Dimensional Depth.",
+        cost: new Decimal(2.5e14),
+        eff() { return player.depth.plus(1).sqrt() },
+        dispEff(e) { return "/"+format(e) },
+        size: "0.9em",
+        
+        voidDesc() { return "Quark Charge is "+((hasAnhUpg(31)&&getVoidUpgTier(34)>1)?"150% stronger.":"twice as strong.") },
+        voidCost: [new Decimal(5e34), new Decimal(2.5e46)],
+    },
+    35: {
+        unl() { return player.photons.unl && player.annihilation.upgs.length>=15 },
+        desc: "Annihilation Boost I affects all Universal Upgrades.",
+        cost: new Decimal(1e17),
+        
+        voidDesc: "The Space-Time Fabric production slowdown is weaker based on AE.",
+        voidCost: [new Decimal(5e34), new Decimal(2.5e46)],
+        voidEff() { return Decimal.sub(1, Decimal.div(1, player.annihilation.energy.plus(1).log10().plus(1).log10().times((hasAnhUpg(31, true)&&player.void.active&&!annihilation_upgs[31].keepVoid&&getVoidUpgTier(35)>1)?.625:.5).plus(1))) },
+        voidDispEff(e) { return format(e.times(100))+"% weaker" },
+        voidSize: "0.9em",
+    },
+    36: {
+        unl() { return player.photons.unl && player.annihilation.upgs.length>=16 },
+        desc: "Base Photon gain is multiplied & raised to an exponent based on Total AE.",
+        cost: new Decimal(5e20),
+        eff() { return {
+            mul: Decimal.pow(10, player.annihilation.total.plus(1).log10().sqrt().div(2.25).max(2)),
+            exp: player.annihilation.total.plus(1).log10().plus(1).log10().div(2).plus(1).sqrt(),
+        }},
+        dispEff(e) { return format(e.mul)+"x, ^"+format(e.exp) },
+        size: "0.75em",
+        
+        voidDesc: "Photonic Matter boosts Space-Time Fabric gain.",
+        voidCost: [new Decimal(1e40), new Decimal(1/0)],
+        voidEff() { return Decimal.pow(2, player.photons.matter.plus(1).log2().sqrt().div(2).times((hasAnhUpg(31, true)&&player.void.active&&!annihilation_upgs[31].keepVoid&&getVoidUpgTier(36)>1)?1.25:1)) },
+        voidDispEff(e) { return format(e)+"x" },
+    },
 }
 
 const void_anh_upgs = Object.keys(annihilation_upgs).filter(x => (x!="rows"&&x!="cols")&&!annihilation_upgs[x].keepVoid)
+const void_anh_upg_rows = Math.ceil(void_anh_upgs.length/6)
 
-function hasAnhUpg(id) { return player.annihilation.upgs.includes(id) && (tmp.anh.upgs && (!tmp.anh.upgs[id].voidSwitch)) };
+function hasAnhUpg(id, noVoidSwitchCheck=false) { 
+    return player.annihilation.upgs.includes(id) && (tmp.anh.upgs && (noVoidSwitchCheck||(!tmp.anh.upgs[id].voidSwitch))) 
+};
 
 function buyAnnihilationUpg(id) {
     let data = annihilation_upgs[id];

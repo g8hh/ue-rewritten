@@ -1,4 +1,5 @@
 function updateTemp() {
+    updateTempPhotons();
     updateTempAnnihilation();
     updateTempVoid();
     updateTempUniverseUpgs();
@@ -52,11 +53,11 @@ function updateTempQuarks() {
         chargeCost: getQuarkChargeCost(),
     }
 
-    tmp.qk.eff.charge = player.quarks.charge.div(10).plus(1),
+    tmp.qk.eff.charge = getQuarkChargeEff();
 
-    tmp.qk.eff.red = softcapQKAmt(player.quarks.red).plus(1).log10().plus(1).pow(tmp.qk.eff.charge.plus(tmp.qk.eff.addedCharge.sub(1)).times(tmp.had.boostEff).times(tmp.qk.eff.multiplyExp)).div(20)
-    tmp.qk.eff.green = softcapQKAmt(player.quarks.green).plus(1).log10().plus(1).pow(tmp.qk.eff.charge.plus(tmp.qk.eff.addedCharge.sub(1)).times(tmp.had.boostEff).times(tmp.qk.eff.multiplyExp)).div(30)
-    tmp.qk.eff.blue = softcapQKAmt(player.quarks.blue).plus(1).log10().plus(1).pow(tmp.qk.eff.charge.plus(tmp.qk.eff.addedCharge.sub(1)).times(tmp.had.boostEff).times(tmp.qk.eff.multiplyExp)).div(10)
+    tmp.qk.eff.red = softcapQKAmt(player.quarks.red).plus(1).log10().plus(1).pow(getQuarkEffExp("r")).div(20)
+    tmp.qk.eff.green = softcapQKAmt(player.quarks.green).plus(1).log10().plus(1).pow(getQuarkEffExp("g")).div(30)
+    tmp.qk.eff.blue = softcapQKAmt(player.quarks.blue).plus(1).log10().plus(1).pow(getQuarkEffExp("b")).div(10)
 
     tmp.qk.gain = { mult: getGlobalQKGainMult() };
     tmp.qk.gain.red = getQuarkGain("red").times(tmp.qk.gain.mult)
@@ -87,7 +88,7 @@ function updateTempHadrons() {
 function updateTempAnnihilation() {
     tmp.anh = {};
     tmp.anh.upgs = {};
-    for (let r=1;r<=annihilation_upgs.rows;r++) for (let c=1;c<=annihilation_upgs.cols;c++) {
+    for (let r=annihilation_upgs.rows;r>=1;r--) for (let c=annihilation_upgs.cols;c>=1;c--) {
         let id = r*10+c;
         if (!annihilation_upgs[id]) continue;
         tmp.anh.upgs[id] = {};
@@ -107,11 +108,25 @@ function updateTempAnnihilation() {
 function updateTempVoid() {
     tmp.void = {};
     tmp.void.upgs = {};
+    tmp.void.upgs.power = getVoidRepUpgPower();
     for (let id=1;id<=void_rep_upgs.amt;id++) {
         var data = { lvl: player.void.repUpgs[id]||new Decimal(0) };
         tmp.void.upgs[id] = data;
         data.cost = void_rep_upgs[id].cost(data.lvl);
-        data.eff = void_rep_upgs[id].eff(data.lvl);
+        data.eff = void_rep_upgs[id].eff(data.lvl.times(tmp.void.upgs.power));
     }
     tmp.void.stGain = getSTFabricGain();
+}
+
+function updateTempPhotons() {
+    tmp.ph = {};
+    tmp.ph.col = {};
+    for (let id=photon_data.length-1;id>=0;id--) {
+        tmp.ph.col[id] = {};
+        tmp.ph.col[id].genEff = getPhotonGenEff(id)
+        tmp.ph.col[id].gain = getPhotonGain(id)
+        tmp.ph.col[id].eff = photon_data[id].eff(photon_data[id].unl()?player.photons.colors[id].amt:new Decimal(0));
+        tmp.ph.col[id].genCost = getPhotonGenCost(id)
+    }
+    tmp.ph.gain = getPhotonicMatterGain();
 }

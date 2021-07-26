@@ -18,13 +18,14 @@ function unlockQuarks() {
 function getGlobalQKGainMult() {
     let mult = new Decimal(1)
     if (hasAnhUpg(21)) mult = tmp.anh.upgs[21].eff
-    if (voidUpgActive(16) && player.quarks.unl && tmp.glu) mult = mult.times(tmp.glu);
+    if (voidUpgActive(16) && player.quarks.unl && tmp.glu) mult = Decimal.mul(mult, tmp.glu.pow((hasAnhUpg(31)&&getVoidUpgTier(12)>1)?1.25:1));
     return mult;
 }
 
 function getQuarkGain(type) {
     if (!player.quarks.unl) return new Decimal(0);
-    return tmp.qk.eff[quark_types[(quark_types.indexOf(type)+2)%quark_types.length]];
+    let gain = tmp.qk.eff[quark_types[(quark_types.indexOf(type)+2)%quark_types.length]];
+    return gain;
 }
 
 function quarkLoop(diff) {
@@ -94,4 +95,23 @@ function softcapQKAmt(x) {
     if (x.gte(1e100)) x = x.times(1e100).sqrt();
     if (x.gte(1e50)) x = Decimal.pow(1e50, x.log(1e50).sqrt());
     return x;
+}
+
+function getQuarkEffExp(type) {
+    let exp = tmp.qk.eff.charge.plus(tmp.qk.eff.addedCharge.sub(1)).times(tmp.had.boostEff).times(tmp.qk.eff.multiplyExp)
+    if (type=="g" && player.photons.unl) exp = exp.times(tmp.ph.col[3].eff.eff); 
+    return exp;
+}
+
+function getQuarkChargeEff() {
+    let eff = player.quarks.charge.div(10);
+    if (voidUpgActive(34)) eff = eff.times((hasAnhUpg(31)&&getVoidUpgTier(34)>1)?2.5:2);
+    return eff.plus(1);
+}
+
+function getGluonScaleName() {
+    let scale = 0;
+    if (player.size.gte(1e4)) scale = 1;
+    if (player.size.gte(1e6)) scale = 2;
+    return ["", "Folded ", "Compressed "][scale]
 }

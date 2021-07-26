@@ -14,6 +14,7 @@ function gameLoop(diff) {
     if (player.autoUU && hasAnhUpg(26)) maxAllUniUpgs(true);
     
     if (player.void.active) voidLoop(diff);
+    if (player.photons.unl) photonLoop(diff);
 }
 
 function getSize(time) {
@@ -58,9 +59,11 @@ function getUniverseSlowdownStart() {
     if (player.hadrons.unl) start = start.times(tmp.had.eff);
     return start;
 }
-
+ 
 function getUniverseCompactionStart() {
-    let start = tmp.upgs[33].eff.times(120);
+    let start = new Decimal(120);
+    if (player.photons.unl) start = start.plus(tmp.ph.col[4].eff.eff.sub(1).times(tmp.upgs[12].eff)); 
+    start = start.times(tmp.upgs[33].eff);
     if (player.hadrons.unl) start = start.times(tmp.had.eff);
     if (hasAnhUpg(25)) start = start.times(2);
     return start;

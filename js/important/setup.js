@@ -16,6 +16,7 @@ const tabs = {
         Quarks() { return player.quarks.unl },
         Hadrons() { return player.hadrons.unl },
         Annihilation() { return player.depth.gte(anhBaseReq)||player.annihilation.reached },
+        Photons() { return player.photons.unl },
     },
     anh: {
         Upgrades() { return player.annihilation.reached },
@@ -45,6 +46,7 @@ function startPlayer() { return {
     hadrons: playerHadronsData(),
     annihilation: playerAnnihilationData(),
     void: playerVoidData(),
+    photons: playerPhotonsData(),
 }}
 
 function save() {
@@ -167,6 +169,10 @@ function loadVue() {
             buyVoidRepUpg,
             voidUpgActive,
             void_anh_upgs,
+            void_anh_upg_rows,
+            photons_unl,
+            photon_data,
+            getGluonScaleName,
         },
     })
 }

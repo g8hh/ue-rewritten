@@ -12,6 +12,7 @@
 
 body {
     background-color: rgb(0, 2, 26);
+    margin: 0 auto;
 }
 
 body, .shadow.normal {
@@ -422,3 +423,91 @@ tr, .tableRow {
 .void.shadow {
     text-shadow: 0.166667em 0.166667em 0.3333333em rgba(255, 255, 255, 0.5), 0.3333333em 0.3333333em 0.66666667em rgba(255, 255, 255, 0.2);
 }
+
+.photons.unlocked {
+    color: rgb(0, 0, 0);
+    background: linear-gradient(45deg, rgb(255, 123, 123) 15%, rgb(123, 255, 255) 50%, rgb(255, 123, 255) 85%);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    padding: 5px 5px 5px 5px;
+}
+
+.photons.locked {
+    color: white;
+    background: linear-gradient(45deg, rgb(119, 81, 81) 15%, rgb(81, 119, 81) 50%, rgb(81, 81, 119) 85%);
+    border: 2px solid rgba(255, 0, 0, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.photons.locked:hover {
+    filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(-45deg);
+}
+
+.photonDiv {
+    width: 30vw;
+    min-height: 8em;
+    padding: 0;
+    transition-duration: 0s;
+}
+
+.photonDiv > * {
+    transition-duration: 0.5s;
+    text-shadow: none;
+}
+
+.photonGenerator { transform: scale(85%); }
+
+.photonDiv.r { 
+    background-color: rgb(121, 0, 0);
+    color: rgb(255, 189, 189);
+    text-shadow: 0.1em 0.1em 0.2em rgb(255, 91, 69), 0.2em 0.2em 0.4em rgb(255, 148, 77);
+}
+.r.text { color: rgb(240, 93, 93); }
+.unlocked > .r.text { color: rgb(112, 0, 0); }
+
+.photonDiv.or { 
+    background-color: rgb(121, 44, 0);
+    color: rgb(255, 213, 189);
+    text-shadow: 0.1em 0.1em 0.2em rgb(255, 159, 69), 0.2em 0.2em 0.4em rgb(255, 222, 77);
+}
+.or.text { color: rgb(240, 164, 93); }
+.unlocked > .or.text { color: rgb(112, 50, 0); }
+
+.photonDiv.ylw { 
+    background-color: rgb(121, 103, 0);
+    color: rgb(255, 248, 189);
+    text-shadow: 0.1em 0.1em 0.2em rgb(243, 255, 69), 0.2em 0.2em 0.4em rgb(216, 255, 77);
+}
+.ylw.text { color: rgb(240, 218, 93); }
+.unlocked > .ylw.text { color: rgb(112, 104, 0); }
+
+.photonDiv.gr { 
+    background-color: rgb(19, 97, 0);
+    color: rgb(189, 255, 189);
+    text-shadow: 0.1em 0.1em 0.2em rgb(91, 255, 69), 0.2em 0.2em 0.4em rgb(77, 255, 166);
+}
+.gr.text { color: rgb(118, 240, 93); }
+.unlocked > .gr.text { color: rgb(19, 112, 0); }
+
+.photonDiv.bl { 
+    background-color: rgb(0, 50, 97);
+    color: rgb(189, 229, 255);
+    text-shadow: 0.1em 0.1em 0.2em rgb(69, 119, 255), 0.2em 0.2em 0.4em rgb(89, 77, 255);
+}
+.bl.text { color: rgb(93, 198, 240); }
+.unlocked > .bl.text { color: rgb(0, 52, 112); }
+
+.photonDiv.pur { 
+    background-color: rgb(45, 0, 97);
+    color: rgb(214, 189, 255);
+    text-shadow: 0.1em 0.1em 0.2em rgb(140, 69, 255), 0.2em 0.2em 0.4em rgb(225, 77, 255);
+}
+.pur.text { color: rgb(181, 154, 255); }
+.unlocked > .pur.text { color: rgb(52, 0, 112); }
+
+.photonDiv.uv { 
+    background-color: rgb(97, 0, 84);
+    color: rgb(255, 189, 225);
+    text-shadow: 0.1em 0.1em 0.2em rgb(255, 69, 171), 0.2em 0.2em 0.4em rgb(255, 77, 77);
+}
+.uv.text { color: rgb(255, 154, 210); }
+.unlocked > .uv.text { color: rgb(112, 0, 62); }

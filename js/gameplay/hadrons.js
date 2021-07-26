@@ -20,7 +20,8 @@ function hadronLoop(diff) {
 
 function getHadronNerfExp() {
     let exp = .5;
-    if (voidUpgActive(14)) exp = Math.sqrt(exp);
+    if (voidUpgActive(14)) exp = (hasAnhUpg(31)&&getVoidUpgTier(14)>1)?Math.pow(exp, 1/3):Math.sqrt(exp);
+    if (player.photons.unl) exp = Math.pow(exp, 1/tmp.ph.col[2].eff.eff.toNumber());
     return exp;
 }
 function getHadrons() { return tmp.had.baseGain.times(player.hadrons.time.pow(getHadronNerfExp())) }
