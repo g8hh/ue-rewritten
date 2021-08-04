@@ -11,10 +11,14 @@ function gameLoop(diff) {
         buyQuarkCharge(true, true)
         boostHadrons(true, true)
     }
+    if (hasAQUpg(32)) setUniverseEssence();
     if (player.autoUU && hasAnhUpg(26)) maxAllUniUpgs(true);
     
-    if (player.void.active) voidLoop(diff);
+    if (player.void.unl) {
+        if (player.void.active||hasAQUpg(33)) voidLoop(diff);
+    }
     if (player.photons.unl) photonLoop(diff);
+    if (player.aq.unl) AQLoop(diff);
 }
 
 function getSize(time) {
@@ -51,6 +55,7 @@ function getSizeBase() {
     if (player.quarks.unl) base = base.pow(tmp.qk.gluon.eff)
     if (player.annihilation.reached) base = base.pow(tmp.anh.eff)
     if (player.void.unl) base = base.pow(tmp.void.upgs[1].eff);
+    if (hasAQUpg(42)) base = base.pow(AQUpgEff(42));
     return base;
 }
 
@@ -58,6 +63,12 @@ function getUniverseSlowdownStart() {
     let start = tmp.upgs[12].eff.plus(2);
     if (player.hadrons.unl) start = start.times(tmp.had.eff);
     return start;
+}
+
+function getUniverseSlowdownPower() {
+    let power = new Decimal(1);
+    if (hasAQUpg(14)) power = power.div(AQUpgEff(14));
+    return power.plus(1);
 }
  
 function getUniverseCompactionStart() {

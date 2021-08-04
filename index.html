@@ -16,6 +16,7 @@
     <script type="text/javascript" src="js/gameplay/annihilation.js"></script>
     <script type="text/javascript" src="js/gameplay/void.js"></script>
     <script type="text/javascript" src="js/gameplay/photons.js"></script>
+    <script type="text/javascript" src="js/gameplay/antiquarks.js"></script>
 </head>
 <body onload="loadGame()">
 	<div id="app">
@@ -75,13 +76,33 @@
                 </div>
             </div>
             <div v-if="tabData.normal=='Quarks'">
-                You have <b class="red shadow">{{format(player.quarks.red)}}</b> Red Quarks, which multiply Green Quark gain by <b class="green shadow">{{format(tmp.qk.eff.red)}}</b>.<br><br>
-                You have <b class="green shadow">{{format(player.quarks.green)}}</b> Green Quarks, which multiply Blue Quark gain by <b class="blue shadow">{{format(tmp.qk.eff.green)}}</b>.<br><br>
-                You have <b class="blue shadow">{{format(player.quarks.blue)}}</b> Blue Quarks, which multiply Red Quark gain by <b class="red shadow">{{format(tmp.qk.eff.blue)}}</b>.<br><br><br>
-                The {{getGluonScaleName()}}Gluon is <b class="gluon shadow">{{format(tmp.qk.gluon.size)}}m</b> long, which boosts Universe Growth Speed{{voidUpgActive(16)?" & Quark gain":""}} by <b class="gluon shadow">{{format(tmp.qk.gluon.eff)}}x</b><br><br><br><br>
-                You have <b class="quarks shadow">{{formatWhole(player.quarks.charge)}}</b> Quark Charge, which strengthens all Quark effects by <b class="quarks shadow">{{format(tmp.qk.eff.charge.sub(1).times(100))+(tmp.qk.eff.addedCharge.gt(1)?(" + "+format(tmp.qk.eff.addedCharge.sub(1).times(100))):"")}}%</b>.<br><br>
-                <button v-bind:class="{ quarks: true, unlocked: tmp.qk.net.gte(tmp.qk.chargeCost), locked: tmp.qk.net.lt(tmp.qk.chargeCost) }" onclick="buyQuarkCharge()">Charge your Quarks.<br>Cost: <b class="quarksupg shadow">{{format(tmp.qk.chargeCost)}}</b> Total Quarks</button><br><br>
-                <button v-if="!player.hadrons.unl" v-bind:class="{ hadrons: true, unlocked: tmp.qk.gluon.size.gte(hadrons_unl_req), locked: tmp.qk.gluon.size.lt(hadrons_unl_req) }" onclick="unlockHadrons()"><b>Unlock Hadrons</b><br>Req: <b class="gluon shadow">{{formatWhole(hadrons_unl_req)}}m</b> of Gluon</button>
+                <table>
+                    <tr>
+                        <td v-for="(tab, name) in tabs.qk"><button v-if="tabs.qk[name]()" v-on:click="showTab(name, 'qk')" v-bind:class="{['qk'+name.toLowerCase()]: true, tabbtn: true, smol: true, unlocked: true}">{{name}}</button></td>
+                    </tr>
+                </table><br v-if="player.aq.unl">
+                <div v-if="tabData.qk=='Quarks'">
+                    You have <b class="red shadow">{{format(player.quarks.red)}}</b> Red Quarks, which multiply Green Quark gain by <b class="green shadow">{{format(tmp.qk.eff.red)}}</b>.<br><br>
+                    You have <b class="green shadow">{{format(player.quarks.green)}}</b> Green Quarks, which multiply Blue Quark gain by <b class="blue shadow">{{format(tmp.qk.eff.green)}}</b>.<br><br>
+                    You have <b class="blue shadow">{{format(player.quarks.blue)}}</b> Blue Quarks, which multiply Red Quark gain by <b class="red shadow">{{format(tmp.qk.eff.blue)}}</b>.<br><br><br>
+                    The {{getGluonScaleName()}}Gluon is <b class="gluon shadow">{{format(tmp.qk.gluon.size)}}m</b> long, which boosts Universe Growth Speed{{voidUpgActive(16)?" & Quark gain":""}} by <b class="gluon shadow">{{format(tmp.qk.gluon.eff)}}x</b><br><br><br><br>
+                    You have <b class="quarks shadow">{{formatWhole(player.quarks.charge)}}</b> Quark Charge, which strengthens all Quark effects by <b class="quarks shadow">{{format(tmp.qk.eff.charge.sub(1).times(100))+(tmp.qk.eff.addedCharge.gt(1)?(" + "+format(tmp.qk.eff.addedCharge.sub(1).times(100))):"")}}%</b>.<br><br>
+                    <button v-bind:class="{ quarks: true, unlocked: tmp.qk.net.gte(tmp.qk.chargeCost), locked: tmp.qk.net.lt(tmp.qk.chargeCost) }" onclick="buyQuarkCharge()">Charge your Quarks.<br>Cost: <b class="quarksupg shadow">{{format(tmp.qk.chargeCost)}}</b> Total Quarks</button><br><br>
+                    <button v-if="!player.hadrons.unl" v-bind:class="{ hadrons: true, unlocked: tmp.qk.gluon.size.gte(hadrons_unl_req), locked: tmp.qk.gluon.size.lt(hadrons_unl_req) }" onclick="unlockHadrons()"><b>Unlock Hadrons</b><br>Req: <b class="gluon shadow">{{formatWhole(hadrons_unl_req)}}m</b> of Gluon</button>
+                </div>
+                <div v-if="tabData.qk=='Antiquarks'">
+                    You have <b class="invert red shadow">{{format(player.aq.red)}}</b> Anti-Red Quarks, which multiply Red Quark gain by <b class="red shadow">{{format(tmp.aq.eff.red)}}</b>, but divide Anti-Green Quark gain by <b class="invert green shadow">{{format(tmp.aq.eff.antired)}}</b>.<br><br>
+                    You have <b class="invert green shadow">{{format(player.aq.green)}}</b> Anti-Green Quarks, which multiply Green Quark gain by <b class="green shadow">{{format(tmp.aq.eff.green)}}</b>, but divide Anti-Blue Quark gain by <b class="invert blue shadow">{{format(tmp.aq.eff.antigreen)}}</b>.<br><br>
+                    You have <b class="invert blue shadow">{{format(player.aq.blue)}}</b> Anti-Blue Quarks, which multiply Blue Quark gain by <b class="blue shadow">{{format(tmp.aq.eff.blue)}}</b>, but divide Anti-Red Quark gain by <b class="invert red shadow">{{format(tmp.aq.eff.antiblue)}}</b>.<br><br><br>
+                    The {{getAntiGluonScaleName()}}Anti-Gluon is <b class="invert gluon shadow">{{format(tmp.aq.gluon.size)}}m</b> long, which multiplies Photonic Matter{{hasAQUpg(21)?" & Anti-Energy":""}} gain by <b class="invert gluon shadow">{{format(tmp.aq.gluon.eff)}}x</b><br><br>
+                    Your Anti-Quarks have generated <b class="invert quarks shadow">{{format(player.aq.energy)}}</b> Anti-Energy (+{{format(getAQEnergyGain())}}/s)<br><br><br>
+                    <b class="invert gluon shadow">Antiquark Upgrade Power: {{format(tmp.aq.upgs.power.times(100))}}%</b><br>
+                    <table>
+                        <tr v-for="r in aq_upgs.rows">
+                            <td v-for="c in aq_upgs.cols" v-if="aq_upgs[r*10+c]&&aq_upgs[r*10+c].unl()" style="margin-right: 5px; margin-left: 5px;"><button v-bind:class="{ aqupg: true, [aq_upgs[r*10+c].type]: true, bought: player.aq.upgs.includes(r*10+c), unlocked: (player.aq.energy.gte(aq_upgs[r*10+c].cost)&&!player.aq.upgs.includes(r*10+c)), locked: (player.aq.energy.lt(aq_upgs[r*10+c].cost)&&!player.aq.upgs.includes(r*10+c)) }" v-on:click="buyAQUpg(r*10+c)" style="font-weight: bold;"><b style="font-size: 17px;">{{aq_upgs[r*10+c].desc}}</b><br><br><span v-if="!player.aq.upgs.includes(r*10+c)">Cost: {{format(checkFunc(aq_upgs[r*10+c].cost))}} Anti-Energy<br><br></span><span v-if="aq_upgs[r*10+c].eff">{{aq_upgs[r*10+c].dispEff(tmp.aq.upgs[r*10+c])}}</span></button></td>
+                        </tr>
+                    </table>
+                </div>
             </div>
             <div v-if="tabData.normal=='Hadrons'">
                 You have <b class="hadrons shadow">{{format(player.hadrons.amount)}}</b> Hadrons (+{{format(tmp.had.dispGain)}}/s), which are extending the starts of Universal Slowdown & Compaction by <b class="hadrons shadow">{{format(tmp.had.eff)}}x</b><br><br>
@@ -132,22 +153,50 @@
                         </table>
                     </div>
                     <div v-if="tabData.anh=='Void'">
-                        You have <b class="void shadow">{{format(player.void.fabric)}}</b> Space-Time Fabric <span v-if="player.void.active">(+{{format(tmp.void.stGain)}}/s)</span><br><br>
+                        You have <b class="void shadow">{{format(player.void.fabric)}}</b> Space-Time Fabric <span v-if="player.void.active||hasAQUpg(33)">(+{{format(tmp.void.stGain.times(player.void.active?1:tmp.ph.col[6].eff.eff))}}/s)</span><br><br>
                         <div style="font-size: 11px; margin-bottom: 5px;">In the Void, all Universal Upgrades are disabled, and Annihilation Upgrades are replaced by Void Upgrades.<br>Space-Time Fabric is gained based on your Universe's size, but slows down over time since last Dimensional Depth<br><br></div>
                         <button class="voidReset void unlocked" onclick="enterVoid()">{{player.void.active?"Exit":"Enter"}} the Void.</button><br><br>
                         <table>
-                            <tr v-for="x in void_rep_upgs.amt"><td><button v-bind:class="{ void: true, unlocked: player.void.fabric.gte(tmp.void.upgs[x].cost), locked: player.void.fabric.lt(tmp.void.upgs[x].cost) }" v-on:click="buyVoidRepUpg(x)" style="width: 500px;"><b style="font-size: 20px;" class="void text">{{void_rep_upgs[x].title}}<br></b>{{void_rep_upgs[x].desc}}<br>Cost: <b class="void text">{{format(tmp.void.upgs[x].cost)}}</b> Space-Time Fabric<br><br>Level: <b class="void text">{{formatWhole(tmp.void.upgs[x].lvl)}}</b><br>Currently: <b class="void text">{{void_rep_upgs[x].dispEff(tmp.void.upgs[x].eff)}}</b></button></td></tr>
+                            <tr v-for="x in void_rep_upgs.amt"><td><button v-bind:class="{ void: true, unlocked: player.void.fabric.gte(tmp.void.upgs[x].cost), locked: player.void.fabric.lt(tmp.void.upgs[x].cost) }" v-on:click="buyVoidRepUpg(x)" style="width: 500px;"><b style="font-size: 20px;" class="void text">{{void_rep_upgs[x].title}}<br></b>{{void_rep_upgs[x].desc}}<br>Cost: <b class="void text">{{format(tmp.void.upgs[x].cost)}}</b> Space-Time Fabric<br><br>Level: <b class="void text">{{formatWhole(tmp.void.upgs[x].lvl)+(tmp.void.upgs.extra.gt(0)?(" + "+format(tmp.void.upgs.extra)):"")}}</b><br>Currently: <b class="void text">{{void_rep_upgs[x].dispEff(tmp.void.upgs[x].eff)}}</b></button></td></tr>
                         </table>
                     </div>
                 </div> 
             </div>
             <div v-if="tabData.normal=='Photons'">
-                <table>
+                <span v-if="!player.aq.unl"><button v-bind:class="{ aq: true, unlocked: player.photons.matter.gte(aq_unl), locked: player.photons.matter.lt(aq_unl) }" onclick="unlockAQ()">Unlock Antiquarks<br><br>Req: <b class="normal shadow">{{format(aq_unl)}}</b> Photonic Matter</button><br><br></span>
+                <table v-if="hasAQUpg(43)" style="margin-bottom: 10px;">
+                    <tr>
+                        <td v-for="(tab, name) in tabs.ph"><button v-if="tabs.ph[name]()" v-on:click="showTab(name, 'ph')" v-bind:class="{['ph'+name.toLowerCase()]: true, tabbtn: true, smol: true, unlocked: true}">{{name}}</button></td>
+                    </tr>
+                </table>
+                <table v-if="tabData.ph=='Photons'">
+                    <tr>
+                        <td>Your Space-Time Fabric has generated <b class="photons shadow" style="font-size: 25px;">{{format(player.photons.matter)}}</b> Photonic Matter (+{{format(tmp.ph.gain)}}/s)</td>
+                    </tr>
+                    <tr v-if="player.aq.unl">
+                        <td><button class="photons unlocked" onclick="maxAllPhotonGens()"><b>Max All</b></button></td>
+                    </tr>
+                    <tr>
+                        <td v-for="(x,i) in photon_data" v-bind:class="{ photonDiv: true, [x.id]: true }" v-if="x.unl()"><h3>{{x.color}} Photons: {{format(player.photons.colors[i].amt)}} <span style="font-size: 12px;">(+{{format(tmp.ph.col[i].gain)}}/s)</span></h3><span v-html="(x.id=='uv'&&!hasAQUpg(33))?'':x.dispEff(tmp.ph.col[i].eff.eff)"></span>{{(x.id=="uv"&&!hasAQUpg(33))?"":"."}}<br>{{x.dispProd(tmp.ph.col[i].eff.prod)}}.<br><br><button v-bind:class="{ photonGenerator: true, photons: true, unlocked: player.photons.matter.gte(tmp.ph.col[i].genCost), locked: player.photons.matter.lt(tmp.ph.col[i].genCost) }" v-on:click="buyPhotonGen(i)"><b v-bind:class="{ [x.id]: true, text: true }">Purchase a {{x.color}} Photon Generator</b><br>Cost: <b class="normal shadow">{{format(tmp.ph.col[i].genCost)}}</b> Photonic Matter<br><br>Level: <b v-bind:class="{ [x.id]: true, text: true }">{{formatWhole(player.photons.colors[i].gen)}}</b><br>Base {{x.color}} Photon gain: <b v-bind:class="{ [x.id]: true, text: true }">{{format(tmp.ph.col[i].genEff)}}/s</b></button></td>
+                    </tr>
+                </table>
+                <table v-if="tabData.ph=='Ultrawaves'">
                     <tr>
                         <td>Your Space-Time Fabric has generated <b class="photons shadow" style="font-size: 25px;">{{format(player.photons.matter)}}</b> Photonic Matter (+{{format(tmp.ph.gain)}}/s)</td>
                     </tr>
                     <tr>
-                        <td v-for="(x,i) in photon_data" v-bind:class="{ photonDiv: true, [x.id]: true }" v-if="x.unl()"><h3>{{x.color}} Photons: {{format(player.photons.colors[i].amt)}} <span style="font-size: 12px;">(+{{format(tmp.ph.col[i].gain)}}/s)</span></h3><span v-html="x.dispEff(tmp.ph.col[i].eff.eff)"></span>{{x.id=="uv"?"":"."}}<br>{{x.dispProd(tmp.ph.col[i].eff.prod)}}.<br><br><button v-bind:class="{ photonGenerator: true, photons: true, unlocked: player.photons.matter.gte(tmp.ph.col[i].genCost), locked: player.photons.matter.lt(tmp.ph.col[i].genCost) }" v-on:click="buyPhotonGen(i)"><b v-bind:class="{ [x.id]: true, text: true }">Purchase a {{x.color}} Photon Generator</b><br>Cost: <b class="normal shadow">{{format(tmp.ph.col[i].genCost)}}</b> Photonic Matter<br><br>Level: <b v-bind:class="{ [x.id]: true, text: true }">{{formatWhole(player.photons.colors[i].gen)}}</b><br>Base {{x.color}} Photon gain: <b v-bind:class="{ [x.id]: true, text: true }">{{format(tmp.ph.col[i].genEff)}}/s</b></button></td>
+                        <td>You have <b class="ultrawaves shadow" style="font-size:25px;">{{formatWhole(player.photons.ultra)}}</b> Ultrawaves.</td>
+                    </tr>
+                    <tr>
+                        <td><button onclick="ultrawaveReset()" v-bind:class="{ ultrawaves: true, unlocked: getUltrawaveGain().gte(1), locked: getUltrawaveGain().lt(1) }" style="width: 15em; height: 15em;"><b>Force an Annihilation reset, and reset Photonic Matter & all Photons to gain <span class="ultrawaves shadow">{{formatWhole(getUltrawaveGain())}}</span> Ultrawaves.</b><br><br>Next at <b class="normal shadow">{{format(getUltrawaveNext())}}</b> Photonic Matter</button></td>
+                    </tr>
+                    <tr>
+                        <td><button v-bind:class="{ waveacc: true, ultrawaves: true, unlocked: (player.photons.ultra.gte(1)&&minAllWaveAcc().gte(player.photons.uwi[1])), locked: (player.photons.ultra.lt(1)||minAllWaveAcc().lt(player.photons.uwi[1])) }" onclick="buyWaveAcc(1)"><h3 class="ultrawaves shadow">Wave Accelerator I</h3>Amount: <b class="ultrawaves shadow">{{formatWhole(player.photons.uwi[1])}}</b><br>Effect: Multiply the gain of all Pre-{{tmp.ph.preX}} Photons by <b class="ultrawaves shadow">{{format(tmp.ph.uw[1])}}.</b><br><br>Cost: 1 Ultrawave (Req {{formatWhole(player.photons.uwi[1])}} of all other Wave Acc.)</button></td>
+                        <td><button v-bind:class="{ waveacc: true, ultrawaves: true, unlocked: (player.photons.ultra.gte(1)&&minAllWaveAcc().gte(player.photons.uwi[2])), locked: (player.photons.ultra.lt(1)||minAllWaveAcc().lt(player.photons.uwi[2])) }" onclick="buyWaveAcc(2)"><h3 class="ultrawaves shadow">Wave Accelerator II</h3>Amount: <b class="ultrawaves shadow">{{formatWhole(player.photons.uwi[2])}}</b><br>Effect: Strengthen the effects of all Pre-{{tmp.ph.preX}} Photons by <b class="ultrawaves shadow">{{format(tmp.ph.uw[2].sub(1).times(100))}}%.</b><br><br>Cost: 1 Ultrawave (Req {{formatWhole(player.photons.uwi[2])}} of all other Wave Acc.)</button></td>
+                        <td><button v-bind:class="{ waveacc: true, ultrawaves: true, unlocked: (player.photons.ultra.gte(1)&&minAllWaveAcc().gte(player.photons.uwi[3])), locked: (player.photons.ultra.lt(1)||minAllWaveAcc().lt(player.photons.uwi[3])) }" onclick="buyWaveAcc(3)"><h3 class="ultrawaves shadow">Wave Accelerator III</h3>Amount: <b class="ultrawaves shadow">{{formatWhole(player.photons.uwi[3])}}</b><br>Effect: Raise the base gain of all Pre-{{tmp.ph.preX}} Photons ^<b class="ultrawaves shadow">{{format(tmp.ph.uw[3])}}.</b><br><br>Cost: 1 Ultrawave (Req {{formatWhole(player.photons.uwi[3])}} of all other Wave Acc.)</button></td>
+                    </tr>
+                    <tr>
+                        <td><button class="ultrawaves unlocked" onclick="respecWaveAcc()"><b>Sell All Wave Accelerators</b></button></td>
                     </tr>
                 </table>
             </div>

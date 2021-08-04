@@ -117,7 +117,10 @@ const universe_upgs = {
         extra() { return hasAnhUpg(35)?tmp.upgs.addNine:new Decimal(0) },
         cost(l) { return l.times(3.5).plus(1).pow(2.9).plus(9).floor() },
         target(r) { return r.sub(9).max(0).root(2.9).sub(1).div(3.5).plus(1).max(0).floor() },
-        eff(l) { return player.quarks.red.plus(1).log10().plus(1).pow(l) },
+        eff(l) { 
+            if (hasAQUpg(23)) l = l.times(AQUpgEff(23))
+            return player.quarks.red.plus(1).log10().plus(1).pow(l) 
+        },
         dispEff(e) { return "/"+format(e) },
     },
     42: {
@@ -149,8 +152,13 @@ function divPrestigeReq() {
     if (voidUpgActive(11)) div = div.times(tmp.anh.upgs[11].voidEff);
     return div;
 }
-function getPrestigeReq() { return Decimal.pow(1.05, player.depth.sub(tmp.upgs[11].eff).div(3).plus(1).pow(3).plus(1)).div(divPrestigeReq()) }
-function getPrestigeTarg() { return player.size.times(divPrestigeReq()).log(1.05).sub(1).cbrt().sub(1).times(3).plus(tmp.upgs[11].eff).plus(1).max(0).floor() }
+function getPrestigeReqBase() {
+    let base = new Decimal(1.05);
+    if (hasAQUpg(34)) base = base.root(AQUpgEff(34));
+    return base;
+}
+function getPrestigeReq() { return Decimal.pow(getPrestigeReqBase(), player.depth.sub(tmp.upgs[11].eff).div(3).plus(1).pow(3).plus(1)).div(divPrestigeReq()) }
+function getPrestigeTarg() { return player.size.times(divPrestigeReq()).log(getPrestigeReqBase()).sub(1).cbrt().sub(1).times(3).plus(tmp.upgs[11].eff).plus(1).max(0).floor() }
 
 function prestige(force=false, auto=false) {
     if (!force) {
@@ -166,7 +174,8 @@ function prestige(force=false, auto=false) {
             else player.essence = player.essence.plus(getUniverseEssenceGainMult().div(2).times(d.sub(s).plus(1)).times(d.plus(s)))
         } else {
             player.depth = player.depth.plus(1);
-            player.essence = player.essence.plus(player.depth.times(getUniverseEssenceGainMult()));
+            if ((voidUpgActive(14)||voidUpgActive(16))&&hasAnhUpg(22)) setUniverseEssence();
+            else player.essence = player.essence.plus(player.depth.times(getUniverseEssenceGainMult()));
         }
     }
 
@@ -184,6 +193,7 @@ function getUniverseEssenceGainMult() {
     let mult = new Decimal(1);
     if (hasAnhUpg(11)) mult = mult.times(tmp.anh.upgs[11].eff);
     if (player.void.unl) mult = mult.times(tmp.void.upgs[1].eff);
+    if (hasAQUpg(32)) mult = mult.times(AQUpgEff(32));
     return mult;
 }
 
@@ -245,11 +255,15 @@ function maxAllUniUpgs(auto=false) {
 
 function adjustUniUpgCost(x, rev=false) {
     if (rev) {
+        if (hasAnhUpg(34) && player.aq.unl) x = x.times(tmp.anh.upgs[34].eff)
+
         if (x.gte(250)) x = x.plus(375).times(100).sqrt()
+
+        if (hasAnhUpg(34) && !player.aq.unl) x = x.times(tmp.anh.upgs[34].eff)
     } else {
         if (x.gte(250)) x = x.pow(2).div(100).sub(375)
-    }
 
-    if (hasAnhUpg(34)) x = rev?x.times(tmp.anh.upgs[34].eff):x.div(tmp.anh.upgs[34].eff);
+        if (hasAnhUpg(34)) x = x.div(tmp.anh.upgs[34].eff)
+    }
     return x;
 }

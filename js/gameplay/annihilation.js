@@ -53,7 +53,10 @@ function annihilate(force=false, auto=false) {
     player.quarks = playerQuarksData(false)
     player.hadrons = playerHadronsData(false)
 
-    if (!auto) updateTemp();
+    if (!auto) {
+        updateTemp();
+        updateTemp();
+    }
 }
 
 function getAnhBoostPow() {
@@ -228,7 +231,7 @@ const annihilation_upgs = {
         unl() { return player.photons.unl && player.annihilation.upgs.length>=14 },
         desc: "All Universal Upgrades are cheaper based on your Dimensional Depth.",
         cost: new Decimal(2.5e14),
-        eff() { return player.depth.plus(1).sqrt() },
+        eff() { return player.depth.plus(1).root(player.aq.unl?1.251:2) },
         dispEff(e) { return "/"+format(e) },
         size: "0.9em",
         
@@ -250,15 +253,17 @@ const annihilation_upgs = {
         unl() { return player.photons.unl && player.annihilation.upgs.length>=16 },
         desc: "Base Photon gain is multiplied & raised to an exponent based on Total AE.",
         cost: new Decimal(5e20),
-        eff() { return {
-            mul: Decimal.pow(10, player.annihilation.total.plus(1).log10().sqrt().div(2.25).max(2)),
-            exp: player.annihilation.total.plus(1).log10().plus(1).log10().div(2).plus(1).sqrt(),
-        }},
+        eff() { 
+            return {
+                mul: Decimal.pow(10, player.annihilation.total.plus(1).log10().sqrt().div(2.25).max(2)),
+                exp: player.annihilation.total.plus(1).log10().plus(1).log10().times(hasAQUpg(13)?AQUpgEff(13):1).div(2).plus(1).sqrt(),
+            }
+        },
         dispEff(e) { return format(e.mul)+"x, ^"+format(e.exp) },
         size: "0.75em",
         
         voidDesc: "Photonic Matter boosts Space-Time Fabric gain.",
-        voidCost: [new Decimal(1e40), new Decimal(1/0)],
+        voidCost: [new Decimal(1e40), new Decimal(1e50)],
         voidEff() { return Decimal.pow(2, player.photons.matter.plus(1).log2().sqrt().div(2).times((hasAnhUpg(31, true)&&player.void.active&&!annihilation_upgs[31].keepVoid&&getVoidUpgTier(36)>1)?1.25:1)) },
         voidDispEff(e) { return format(e)+"x" },
     },

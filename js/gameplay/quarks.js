@@ -25,6 +25,7 @@ function getGlobalQKGainMult() {
 function getQuarkGain(type) {
     if (!player.quarks.unl) return new Decimal(0);
     let gain = tmp.qk.eff[quark_types[(quark_types.indexOf(type)+2)%quark_types.length]];
+    if (player.aq.unl && gain.gte(1)) gain = Decimal.mul(gain, tmp.aq.eff[type].max(1));
     return gain;
 }
 

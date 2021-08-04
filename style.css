@@ -134,6 +134,22 @@ tr, .tableRow {
     background: linear-gradient(135deg, rgba(12, 81, 255,1) 20%, rgba(191,0,131,1) 100%);
 }
 
+.universe.locked {
+    color: white;
+    background: linear-gradient(135deg, rgb(53, 75, 131) 20%, rgb(104, 48, 86) 100%);
+    border: 1px solid red;
+}
+.universe.locked:hover {
+    filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(-45deg);
+}
+
+.universe.bought {
+    color: white;
+    background: linear-gradient(135deg, rgba(12, 81, 255,1) 20%, rgba(191,0,131,1) 100%);
+    filter: sepia(75%) saturate(300%) brightness(70%) hue-rotate(-135deg);
+    border: 3px solid blue;
+}
+
 .prestige.unlocked {
     color: black;
     background-color: rgb(0, 210, 247);
@@ -150,6 +166,13 @@ tr, .tableRow {
 
 .prestige.locked:hover {
     background-color: rgb(121, 64, 64)
+}
+
+.prestige.bought {
+    color: white;
+    background-color: rgb(77, 114, 106);
+    border: 2px solid rgba(78, 192, 84, 0.5);
+    padding: 5px 5px 5px 5px;
 }
 
 .prestige.shadow {
@@ -197,7 +220,7 @@ tr, .tableRow {
     margin-right: 15px;
 }
 
-.quarks.unlocked {
+.quarks.unlocked, .qkquarks.unlocked {
     color: white;
     background: linear-gradient(90deg, red 15%, green 50%, blue 85%);
     border: 2px solid rgb(158, 255, 247);
@@ -277,6 +300,13 @@ tr, .tableRow {
 
 .hadrons.locked:hover {
     background-color: rgba(228, 152, 108, 0.5);
+}
+
+.hadrons.bought {
+    color: white;
+    background-color: rgb(71, 88, 0);
+    border: 2px solid rgba(132, 228, 108, 0.5);
+    padding: 5px 5px 5px 5px;
 }
 
 .hadrons.shadow {
@@ -424,7 +454,7 @@ tr, .tableRow {
     text-shadow: 0.166667em 0.166667em 0.3333333em rgba(255, 255, 255, 0.5), 0.3333333em 0.3333333em 0.66666667em rgba(255, 255, 255, 0.2);
 }
 
-.photons.unlocked {
+.photons.unlocked, .phphotons.unlocked {
     color: rgb(0, 0, 0);
     background: linear-gradient(45deg, rgb(255, 123, 123) 15%, rgb(123, 255, 255) 50%, rgb(255, 123, 255) 85%);
     border: 2px solid rgba(255, 255, 255, 0.4);
@@ -440,6 +470,14 @@ tr, .tableRow {
 
 .photons.locked:hover {
     filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(-45deg);
+}
+
+.photons.bought {
+    background: linear-gradient(45deg, rgb(119, 81, 81) 15%, rgb(81, 119, 81) 50%, rgb(81, 81, 119) 85%);
+    border: 2px solid rgba(76, 255, 5, 0.4);
+    padding: 5px 5px 5px 5px;
+    filter: sepia(100%) saturate(300%) hue-rotate(45deg);
+    color: white;
 }
 
 .photonDiv {
@@ -511,3 +549,100 @@ tr, .tableRow {
 }
 .uv.text { color: rgb(255, 154, 210); }
 .unlocked > .uv.text { color: rgb(112, 0, 62); }
+
+.photonDiv.x { 
+    background-color: rgb(94, 94, 94);
+    color: rgb(255, 255, 255);
+    text-shadow: 0.1em 0.1em 0.2em rgb(255, 255, 255), 0.2em 0.2em 0.4em rgb(194, 194, 194);
+}
+.x.text { color: rgb(210, 210, 210); }
+.unlocked > .x.text { color: rgb(112, 112, 112); }
+
+.aq.unlocked, .qkantiquarks.unlocked {
+    color: rgb(0, 0, 0);
+    background: linear-gradient(90deg, rgb(0, 255, 255) 15%, rgb(255, 0, 255) 50%, rgb(255, 255, 0) 85%);
+    border: 2px solid rgb(158, 255, 247);
+    padding: 5px 5px 5px 5px;
+}
+
+.aq.locked {
+    color: white;
+    background: linear-gradient(90deg, rgb(81, 119, 119) 15%, rgb(119, 81, 119) 50%, rgb(119, 119, 81) 85%);
+    border: 2px solid rgba(255, 0, 0, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.aq.locked:hover {
+    filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(-45deg);
+}
+
+.aq.bought {
+    color: white;
+    background: linear-gradient(90deg, rgb(81, 119, 114) 15%, rgb(111, 81, 119) 50%, rgb(112, 119, 81) 85%);
+    border: 2px solid rgba(21, 255, 0, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.smol {
+    transform: scale(90%);
+    filter: sepia(60%);
+}
+
+.smol.unlocked:hover {
+    transform: scale(100%);
+    filter: sepia(50%) brightness(120%);
+}
+
+.smol.unlocked:active {
+    transition-duration: 0.25s;
+    filter: sepia(40%) brightness(190%);
+    transform: scale(1.1);
+}
+
+.invert {
+    filter: invert(100%) brightness(120%);
+    text-shadow: 0.166667em 0.166667em 0.33333em rgba(0, 0, 0, 0.5) !important;
+}
+
+.aqupg {
+    width: 15em;
+    height: 15em;
+    font-size: .85em !important;
+}
+
+.ultrawaves.unlocked, .phultrawaves.unlocked {
+    color: rgb(0, 0, 0);
+    background: linear-gradient(-45deg, rgb(123, 255, 244) 15%, rgb(255, 123, 123) 50%, rgb(149, 255, 123) 85%);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    padding: 5px 5px 5px 5px;
+    filter: sepia(0%);
+}
+
+.ultrawaves.locked {
+    color: white;
+    background: linear-gradient(-45deg, rgb(81, 119, 117) 15%,rgb(119, 81, 114) 50%,rgb(119, 101, 81) 85%);
+    border: 2px solid rgba(255, 0, 0, 0.5);
+    padding: 5px 5px 5px 5px;
+}
+
+.ultrawaves.locked:hover {
+    filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(-45deg);
+}
+
+.ultrawaves.bought {
+    color: white;
+    background: linear-gradient(-45deg, rgb(66, 107, 105) 15%,rgb(121, 63, 113) 50%,rgb(116, 88, 58) 85%);
+    border: 2px solid rgba(0, 255, 0, 0.5);
+    padding: 5px 5px 5px 5px;
+    filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(45deg);
+}
+
+.ultrawaves.shadow {
+    color: rgb(206, 205, 255);
+    text-shadow: 0.166667em 0.166667em 0.3333333em rgb(37, 143, 116), 0.3333333em 0.3333333em 0.66666667em rgb(125, 139, 42);
+}
+
+.waveacc {
+    width: 30vw;
+    height: 15em;
+}

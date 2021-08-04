@@ -4,7 +4,9 @@ var tmp = {};
 var intervals = {};
 var tabData = {
     normal: "Universe",
+    qk: "Quarks",
     anh: "Upgrades",
+    ph: "Photons",
 }
 var importInput;
 var storageName = "UErewritten";
@@ -18,10 +20,18 @@ const tabs = {
         Annihilation() { return player.depth.gte(anhBaseReq)||player.annihilation.reached },
         Photons() { return player.photons.unl },
     },
+    qk: {
+        Quarks() { return player.aq.unl },
+        Antiquarks() { return player.aq.unl },
+    },
     anh: {
         Upgrades() { return player.annihilation.reached },
         Boosts() { return player.annihilation.reached },
         Void() { return player.void.unl },
+    },
+    ph: {
+        Photons() { return hasAQUpg(43) },
+        Ultrawaves() { return hasAQUpg(43) },
     },
 }
 
@@ -47,6 +57,7 @@ function startPlayer() { return {
     annihilation: playerAnnihilationData(),
     void: playerVoidData(),
     photons: playerPhotonsData(),
+    aq: playerAQData(),
 }}
 
 function save() {
@@ -173,6 +184,14 @@ function loadVue() {
             photons_unl,
             photon_data,
             getGluonScaleName,
+            aq_unl,
+            getAntiGluonScaleName,
+            aq_upgs,
+            buyAQUpg,
+            hasAQUpg,
+            getUltrawaveGain,
+            getUltrawaveNext,
+            minAllWaveAcc,
         },
     })
 }
